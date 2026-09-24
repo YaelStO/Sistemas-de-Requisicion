@@ -1,0 +1,131 @@
+<div class="dashboard-layout">
+  <app-sidebar activo="areas" />
+
+  <main class="content-area">
+    <header class="main-header">
+      <div>
+        <h1>Gestion de Areas</h1>
+        <p class="subtext">Organigrama institucional independiente de los usuarios</p>
+      </div>
+      <div class="header-right">
+        <i class="bi bi-building"></i>
+        <span class="brand-text">Gobierno de Mexico</span>
+      </div>
+    </header>
+
+    @if (mensaje) {
+      <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {{ mensaje }}
+      </div>
+    }
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <section class="card border-0 shadow-sm p-4 mb-4">
+      <h3 class="section-title">
+        <i class="bi bi-diagram-3 me-2"></i>{{ editandoId ? 'Editar area' : 'Nueva area' }}
+      </h3>
+      <form [formGroup]="areasForm" (ngSubmit)="guardar()">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Nombre del area</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-building"></i></span>
+              <input type="text" class="form-control" formControlName="nombre" placeholder="ej. Coordinacion de TI" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Nivel</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
+              <select class="form-select" formControlName="nivel">
+                @for (n of niveles; track n.valor) {
+                  <option [value]="n.valor">{{ n.etiqueta }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Area superior</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-arrow-up-circle"></i></span>
+              <select class="form-select" formControlName="parentId">
+                <option [ngValue]="null">--- Ninguna (raiz) ---</option>
+                @for (a of areas; track a.id) {
+                  @if (a.id !== editandoId) {
+                    <option [ngValue]="a.id">{{ a.nombre }}</option>
+                  }
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-burgundy mt-3 me-2">
+          <i class="bi bi-check-lg me-1"></i>{{ editandoId ? 'Guardar cambios' : 'Crear area' }}
+        </button>
+        @if (editandoId) {
+          <button type="button" class="btn btn-outline-secondary mt-3" (click)="resetForm()">Cancelar</button>
+        }
+      </form>
+    </section>
+
+    <section class="card border-0 shadow-sm p-4">
+      <h3 class="section-title">
+        <i class="bi bi-diagram-2 me-2"></i>Areas del organigrama
+      </h3>
+      @if (cargando) {
+        <div class="text-center text-muted py-3">
+          <div class="spinner-border text-secondary me-2" role="status"></div>
+          Cargando...
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-crema">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Nivel</th>
+                <th>Area superior</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of areas; track a.id) {
+                <tr>
+                  <td>{{ a.id }}</td>
+                  <td><i class="bi bi-building me-1 text-muted"></i>{{ a.nombre }}</td>
+                  <td><span class="badge bg-secondary">{{ a.nivel }}</span></td>
+                  <td>{{ a.padreNombre ?? '---' }}</td>
+                  <td>
+                    <span class="badge" [class.bg-success]="a.activo" [class.bg-danger]="!a.activo">
+                      {{ a.activo ? 'Activa' : 'Inactiva' }}
+                    </span>
+                  </td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" (click)="editar(a)">
+                      <i class="bi bi-pencil me-1"></i>Editar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" (click)="toggleActivo(a)">
+                      <i class="bi me-1" [class.bi-toggle-on]="a.activo" [class.bi-toggle-off]="!a.activo"></i>
+                      {{ a.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(a)">
+                      <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </main>
+</div>

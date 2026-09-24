@@ -1,0 +1,296 @@
+<div class="dashboard-layout">
+  <!-- BARRA LATERAL -->
+  <app-sidebar activo="nueva" />
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="content-area">
+
+    <!-- ENCABEZADO -->
+    <header class="main-header">
+      <div>
+        <h1>Nueva Requisicion de Materiales</h1>
+        <p class="subtext">Generacion de solicitud por parte del Departamento</p>
+      </div>
+      <div class="header-right">
+        <span class="position-relative">
+          <i class="bi bi-bell fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            3
+          </span>
+        </span>
+        <i class="bi bi-building ms-2"></i>
+        <span class="brand-text">Gobierno de Mexico</span>
+      </div>
+    </header>
+
+    @if (mensaje) {
+      <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {{ mensaje }}
+      </div>
+    }
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <form class="requisicion-form" [formGroup]="requisicionForm" (ngSubmit)="guardarRequisicion()">
+
+      <!-- SECCION 1: DATOS DE IDENTIFICACION -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-guinda">
+          <i class="bi bi-person-badge me-2"></i>Datos de Identificacion
+        </h3>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="form-floating">
+              <input type="text" class="form-control" [value]="nombreSolicitante" readonly />
+              <label>Nombre del Solicitante</label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              <input type="text" class="form-control" [value]="areaSolicitante" readonly />
+              <label>Departamento</label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating">
+              <input type="date" class="form-control" formControlName="fechaRequerida" />
+              <label>Fecha en que se requiere</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-4">
+            <div class="form-floating">
+              <input type="text" class="form-control" [value]="fechaSolicitud" readonly />
+              <label>Fecha de Solicitud</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCION 2: AGREGAR MATERIAL O INSUMO -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-guinda">
+          <i class="bi bi-box-seam me-2"></i>Agregar Material o Insumo
+        </h3>
+        <p class="text-muted mb-3" style="font-size:0.8rem">
+          <i class="bi bi-info-circle me-1"></i>Solo se puede solicitar un producto por requisicion.
+        </p>
+
+        <div class="row g-3 align-items-end">
+          <div class="col-md-2">
+            <label class="form-label small text-muted">Partida Especifica</label>
+            <select class="form-select" formControlName="partidaId" (change)="onPartidaChange($event)">
+              <option value="">Seleccionar</option>
+              @for (p of partidasList; track p.id) {
+                <option [value]="p.id">{{ p.codigo }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-10">
+            <label class="form-label small text-muted">Concepto</label>
+            <input type="text" class="form-control" [value]="partidaSeleccionada ? partidaSeleccionada.nombre : ''" readonly />
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-3" (click)="verDescripcion()">
+          <i class="bi bi-eye me-1"></i>Ver Descripcion
+        </button>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-5">
+            <label class="form-label small text-muted">Material</label>
+            <input type="text" class="form-control" formControlName="materialSolicitado" placeholder="Computadora Portatil" />
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted">Cantidad</label>
+            <input type="number" class="form-control" formControlName="cantidad" min="1" />
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted">Unidad</label>
+            <select class="form-select" formControlName="unidadMedida">
+              @for (u of unidadesMedidaList; track u.id) {
+                <option [value]="u.nombre">{{ u.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted">Precio Estimado Unitario</label>
+            <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput placeholder="0.00" />
+            @if (requisicionForm.get('precioEstimadoUnitario')?.invalid && requisicionForm.get('precioEstimadoUnitario')?.touched) {
+              <div class="invalid-feedback d-block">Ingresa un precio mayor a 0.</div>
+            }
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-12">
+            <label class="form-label small text-muted">Descripcion de Caracteristicas</label>
+            <input type="text" class="form-control" formControlName="descripcion" placeholder="Laptop con procesador Intel core i5 1300u, 500 GB de almacenamiento, 8 GB de Memoria RAM" />
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-12">
+            <label class="form-label small text-muted">Justificacion de Compra</label>
+            <input type="text" class="form-control" formControlName="justificacion" placeholder="Renovacion de equipos del equipo de desarrollo de software institucional." />
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCION 3: SUGERENCIAS DE ADQUISICION -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-red">
+          <i class="bi bi-lightbulb me-2"></i>Sugerencias de adquisicion
+        </h3>
+        <p class="text-muted mb-3" style="font-size:0.8rem">
+          <i class="bi bi-info-circle me-1"></i>Agrega una o mas sugerencias por producto.
+        </p>
+
+        <div formArrayName="sugerencias">
+          @for (sug of sugerencias.controls; track sug; let i = $index) {
+            <div class="row g-3 mt-2 p-3 border rounded bg-light" [formGroupName]="i">
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Marca <span class="text-muted">(máx. {{ maxMarca }})</span></label>
+                <input type="text" class="form-control" formControlName="marca" placeholder="DELL" maxlength="300" />
+                @if (sug.get('marca')?.value) {
+                  <div class="contador-caracteres" [class.limite]="(sug.get('marca')!.value ?? '').length >= maxMarca">
+                    {{ (sug.get('marca')!.value ?? '').length }}/{{ maxMarca }}
+                  </div>
+                }
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Modelo <span class="text-muted">(máx. {{ maxModelo }})</span></label>
+                <input type="text" class="form-control" formControlName="modelo" placeholder="Inspiron 5440" maxlength="200" />
+                @if (sug.get('modelo')?.value) {
+                  <div class="contador-caracteres" [class.limite]="(sug.get('modelo')!.value ?? '').length >= maxModelo">
+                    {{ (sug.get('modelo')!.value ?? '').length }}/{{ maxModelo }}
+                  </div>
+                }
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Precio Estimado Unitario</label>
+                <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput placeholder="0.00" />
+              </div>
+              <div class="col-12">
+                <label class="form-label small text-muted">Enlace / Referencia</label>
+                <input type="text" class="form-control" formControlName="enlaceUrl" placeholder="https://www.walmart.com.mx/ip/laptop-dell..." />
+                @if (sug.get('enlaceUrl')?.invalid && sug.get('enlaceUrl')?.touched) {
+                  <div class="invalid-feedback d-block">Ingresa una URL válida (ej. https://www.ejemplo.com)</div>
+                }
+              </div>
+              <div class="col-12">
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarSugerencia(i)">
+                  <i class="bi bi-trash me-1"></i>Eliminar sugerencia
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <button type="button" class="btn btn-teal mt-3" (click)="agregarSugerencia()">
+          <i class="bi bi-plus-circle me-1"></i>Agregar sugerencia
+        </button>
+
+        <!-- ZONA DE CARGA DE ARCHIVO -->
+        <div class="mt-4">
+          <label class="form-label small text-muted">Adjuntar PDF de Cotizacion o Ficha Tecnica</label>
+          <div class="drop-zone" (click)="fileInput.click()">
+            <i class="bi bi-cloud-arrow-up fs-1" style="color:#5b1225"></i>
+            <p class="drag-text">Arrastra un archivo PDF aqui</p>
+            <p class="sub-drag">O haz clic para seleccionar (max. 10 MB)</p>
+          </div>
+          <input #fileInput type="file" accept="application/pdf" (change)="onArchivoSeleccionado($event)" hidden />
+          <button type="button" class="btn btn-burgundy mt-2" (click)="fileInput.click()">
+            <i class="bi bi-upload me-1"></i>Subir archivo
+          </button>
+        </div>
+      </section>
+
+      <!-- SECCION 4: TABLA DE COTIZACIONES -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-guinda">
+          <i class="bi bi-table me-2"></i>Tabla de Adquisicion / Cotizaciones
+        </h3>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-crema">
+              <tr>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Precio Unitario</th>
+                <th>Enlace / Referencia</th>
+                <th>PDF / Ficha</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (sug of sugerencias.controls; track sug; let i = $index) {
+                <tr>
+                  <td>{{ sug.get('marca')?.value || '-' }}</td>
+                  <td>{{ sug.get('modelo')?.value || '-' }}</td>
+                  <td>{{ formatMoney(sug.get('precioEstimadoUnitario')?.value) }}</td>
+                  <td>
+                    @if (sug.get('enlaceUrl')?.value) {
+                      <a [href]="sug.get('enlaceUrl')?.value" target="_blank" class="text-decoration-none">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>{{ sug.get('enlaceUrl')?.value }}
+                      </a>
+                    }
+                  </td>
+                  <td>
+                    @if (archivosPdf[i]) {
+                      <a href="javascript:void(0)" (click)="abrirPdf(i)" class="text-decoration-none text-danger">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>{{ archivosPdf[i].name }}
+                      </a>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn btn-teal mt-3" (click)="agregarSugerencia()">
+          <i class="bi bi-plus-circle me-1"></i>Agregar Material
+        </button>
+      </section>
+
+      <!-- SECCION 5: RESUMEN Y ACCIONES -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-red">
+          <i class="bi bi-clipboard-data me-2"></i>Resumen de la requisicion
+        </h3>
+
+        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+          <span class="fw-bold">{{ requisicionForm.get('materialSolicitado')?.value || 'Sin material' }}</span>
+          <div class="d-flex gap-4 small text-muted">
+            <span>Cantidad: <strong>{{ requisicionForm.get('cantidad')?.value || 0 }}</strong></span>
+            <span>Unidad: <strong>{{ requisicionForm.get('unidadMedida')?.value || '-' }}</strong></span>
+            <span>P. Unitario Est.: <strong>{{ formatMoney(requisicionForm.get('precioEstimadoUnitario')?.value) }}</strong></span>
+            <span class="fw-bold text-dark fs-6">Total: {{ formatMoney(totalEstimado) }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3 justify-content-end">
+          <button type="button" class="btn btn-burgundy">
+            <i class="bi bi-pencil-square me-1"></i>Editar Requisicion
+          </button>
+          <button type="submit" class="btn btn-teal" [disabled]="guardando">
+            <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!guardando" class="bi bi-send me-1"></i>Enviar a Coordinacion para Revision
+          </button>
+        </div>
+      </section>
+
+    </form>
+  </main>
+</div>

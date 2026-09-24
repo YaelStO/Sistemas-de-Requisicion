@@ -1,0 +1,235 @@
+$guinda: #5b1225;
+$guinda-light: #731830;
+
+.sidebar {
+  width: 280px;
+  background-color: $guinda;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.2s ease;
+  z-index: 100;
+
+  .sidebar-header {
+    padding: 1.25rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 84px;
+
+    .brand-icono {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.12);
+      color: #f1c40f;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .brand-texto {
+      flex: 1;
+      min-width: 0;
+
+      h2 { font-size: 1rem; margin: 0; font-weight: 700; white-space: nowrap; }
+      p { font-size: 0.65rem; color: #d0a3ae; margin: 0.15rem 0 0; white-space: nowrap; }
+    }
+
+    .btn-toggle {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      border-radius: 8px;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+
+      i { font-size: 1rem; }
+
+      &:hover {
+        background-color: $guinda-light;
+      }
+    }
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding-bottom: 1rem;
+
+    .nav-item {
+      color: #ffffff;
+      text-decoration: none;
+      padding: 0.72rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: background 0.2s;
+      cursor: pointer;
+      white-space: nowrap;
+
+      .icon {
+        font-size: 1.1rem;
+        width: 1.35rem;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .nav-texto {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .badge {
+        background-color: #f1c40f;
+        color: #000;
+        border-radius: 50%;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+
+      &:hover, &.active {
+        background-color: $guinda-light;
+      }
+
+      &.active {
+        background-color: #ffffff;
+        color: $guinda;
+        font-weight: 600;
+        border-radius: 8px 0 0 8px;
+        margin-left: 0.5rem;
+
+        .icon { color: $guinda; }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    .user-box {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #f1c40f;
+        color: $guinda;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .user-texto {
+        min-width: 0;
+        .role { font-size: 0.72rem; font-weight: bold; margin: 0; white-space: nowrap; }
+        .user { font-size: 0.68rem; color: #d0a3ae; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      }
+    }
+
+    .btn-logout {
+      margin-top: 0.25rem;
+      width: 100%;
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 0.45rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+
+      i { font-size: 1rem; }
+
+      &:hover {
+        background-color: $guinda-light;
+      }
+    }
+  }
+
+  /* ===== ESTADO COLAPSADO (solo iconos) ===== */
+  &.colapsada {
+    width: 70px;
+
+    .sidebar-header {
+      padding: 1.25rem 0.6rem;
+      justify-content: center;
+
+      .brand-texto { display: none; }
+      .brand-icono { display: none; }
+      .btn-toggle { display: flex; }
+    }
+
+    .sidebar-menu .nav-item {
+      justify-content: center;
+      padding: 0.9rem 0;
+      gap: 0;
+
+      .nav-texto {
+        display: none;
+      }
+
+      &.active {
+        margin-left: 0.25rem;
+        border-radius: 8px;
+      }
+
+      .badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 9px;
+        height: 9px;
+        padding: 0;
+        font-size: 0;
+        border: 2px solid $guinda;
+      }
+    }
+
+    .nav-item { position: relative; }
+
+    .sidebar-footer {
+      padding: 0.75rem 0.5rem;
+
+      .user-box {
+        justify-content: center;
+        .user-texto { display: none; }
+      }
+
+      .btn-logout {
+        .nav-texto { display: none; }
+      }
+    }
+  }
+}

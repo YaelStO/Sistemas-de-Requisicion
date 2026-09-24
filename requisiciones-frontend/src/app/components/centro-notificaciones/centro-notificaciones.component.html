@@ -1,0 +1,69 @@
+<div class="dashboard-layout">
+  <app-sidebar activo="notificaciones" />
+
+  <main class="content-area">
+    <header class="main-header">
+      <div>
+        <h1>Centro de Notificaciones</h1>
+        <p class="subtext">Movimientos sobre tus solicitudes: quién las modifico, aprobo o rechazo</p>
+      </div>
+      <div class="header-right">
+        <i class="bi bi-building"></i>
+        <span class="brand-text">Gobierno de Mexico</span>
+      </div>
+    </header>
+
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <div class="card border-0 shadow-sm p-4">
+      @if (cargando) {
+        <div class="text-center text-muted py-4">
+          <div class="spinner-border text-secondary me-2" role="status"></div>
+          Cargando notificaciones...
+        </div>
+      } @else if (notificaciones.length === 0) {
+        <p class="text-center text-muted py-4">
+          <i class="bi bi-bell-slash me-1"></i>Aun no hay notificaciones. Cuando alguien modifique, apruebe o rechace tus solicitudes apareceran aqui.
+        </p>
+      } @else {
+        <div class="notif-list">
+          @for (n of notificaciones; track $index) {
+            <div class="notif-item" [class]="tipoClase(n)">
+              <div class="notif-icon">
+                <i class="bi" [class]="tipoIcono(n)"></i>
+              </div>
+              <div class="notif-body">
+                <div class="notif-header">
+                  <strong class="folio">{{ n.folio }}</strong>
+                  <span class="accion">{{ n.accion }}</span>
+                  <span class="fecha">{{ formatoFecha(n.fechaHora) }}</span>
+                </div>
+                <p class="quien mb-0">
+                  <i class="bi bi-person me-1 text-muted"></i>{{ n.usuario }} <span class="text-muted">({{ n.rol }})</span>
+                </p>
+                @if (mostrarDetalle(n)) {
+                  <p class="detalle mb-0">
+                    <span class="text-muted">{{ n.campo }}:</span>
+                    @if (n.valorAnterior && n.valorAnterior !== '—') {
+                      <span class="antes">{{ n.valorAnterior }}</span>
+                      <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                    }
+                    <span class="ahora">{{ n.valorNuevo || '—' }}</span>
+                  </p>
+                }
+                <a class="btn btn-sm btn-teal mt-2" [routerLink]="['/autorizacion-detalle', n.requisicionId]">
+                  <i class="bi bi-eye me-1"></i>Ver solicitud
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </main>
+</div>

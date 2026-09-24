@@ -1,0 +1,75 @@
+<div class="dashboard-layout">
+  <app-sidebar activo="proceso" />
+
+  <main class="content-area">
+    <header class="main-header">
+      <div>
+        <h1>Mis Solicitudes en Proceso</h1>
+        <p class="subtext">Consulta en que nivel de autorizacion va cada solicitud que enviaste</p>
+      </div>
+      <div class="header-right">
+        <i class="bi bi-building"></i>
+        <span class="brand-text">Gobierno de Mexico</span>
+      </div>
+    </header>
+
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <div class="card border-0 shadow-sm p-4">
+      @if (cargando) {
+        <div class="text-center text-muted py-4">
+          <div class="spinner-border text-secondary me-2" role="status"></div>
+          Cargando solicitudes...
+        </div>
+      } @else if (requisiciones.length === 0) {
+        <p class="text-center text-muted py-4">
+          <i class="bi bi-inbox me-1"></i>No tienes solicitudes en proceso. Las enviadas que ya fueron aprobadas o rechazadas se consultan en tu historial.
+        </p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-crema">
+              <tr>
+                <th>Folio</th>
+                <th>Material</th>
+                <th>Area</th>
+                <th>Estado Coord.</th>
+                <th>Estado Dir.</th>
+                <th>Estado Dir. Gral.</th>
+                <th>Etapa actual</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of requisiciones; track r.id) {
+                <tr>
+                  <td class="folio">{{ r.folio }}</td>
+                  <td>{{ r.material }}</td>
+                  <td>{{ r.area }}</td>
+                  <td><span class="badge-estado" [class]="estadoClase(r.estadoCoord)">{{ estadoEtiqueta(r.estadoCoord) }}</span></td>
+                  <td><span class="badge-estado" [class]="estadoClase(r.estadoDir)">{{ estadoEtiqueta(r.estadoDir) }}</span></td>
+                  <td><span class="badge-estado" [class]="estadoClase(r.estadoDirGral)">{{ estadoEtiqueta(r.estadoDirGral) }}</span></td>
+                  <td>
+                    <span class="badge bg-secondary" style="font-size:0.7rem; border-radius:20px;">
+                      <i class="bi bi-arrow-return-right me-1"></i>{{ etapaActual(r) }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-teal" [routerLink]="['/autorizacion-detalle', r.id]">
+                      <i class="bi bi-eye me-1"></i>Ver detalle
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </main>
+</div>

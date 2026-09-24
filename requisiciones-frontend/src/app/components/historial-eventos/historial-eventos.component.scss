@@ -1,0 +1,37 @@
+.table-crema {
+  th {
+    background-color: #fbf3d5;
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+/* Filas de color por tipo de accion */
+tr.row-mod td { background-color: #eef6fb; }
+tr.row-aprobado td { background-color: #eaf7ee; }
+tr.row-rechazado td { background-color: #fdecea; }
+
+.accion-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  &.row-mod { background: #cfe6f5; color: #1b5278; }
+  &.row-aprobado { background: #c5e6cd; color: #15572c; }
+  &.row-rechazado { background: #f3c9c5; color: #7d241b; }
+}
+
+.val-celda {
+  color: #333;
+  overflow-wrap: anywhere;
+}
+
+.page-link {
+  color: #5b1225;
+  &:hover { background-color: #fbf3d5; color: #5b1225; }
+}
+
+.page-item.active .page-link {
+  background-color: #5b1225;
+  border-color: #5b1225;
+}

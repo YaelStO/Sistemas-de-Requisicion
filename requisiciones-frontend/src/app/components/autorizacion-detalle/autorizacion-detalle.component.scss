@@ -1,0 +1,124 @@
+$guinda: #5b1225;
+$verde-teal: #235b4e;
+$crema-tabla: #fbf3d5;
+$warning: #f1c40f;
+
+.table-crema {
+  th {
+    background-color: $crema-tabla;
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem 0;
+  &.text-guinda { color: $guinda; }
+  &.text-red { color: #b02a37; }
+}
+
+/* ENCABEZADO DE REQUISICION */
+.req-header-card {
+  border-left: 6px solid $warning !important;
+  border-radius: 8px !important;
+}
+
+/* FIRMAS JERARQUICAS */
+.firma-card {
+  border-radius: 8px;
+  border-top: 4px solid #bdc3c7;
+
+  .estado-nivel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+  }
+
+  &.success {
+    border-top-color: #27ae60;
+    .estado-nivel { background: #eaf7ee; color: #1e7a3a; }
+  }
+
+  &.pending {
+    border-top-color: $warning;
+    .estado-nivel { background: #fef9e7; color: #8a6d1a; }
+  }
+
+  &.danger {
+    border-top-color: #c0392b;
+    .estado-nivel { background: #fdecea; color: #a93226; }
+  }
+
+  &.na {
+    border-top-color: #bdc3c7;
+    .estado-nivel { background: #ecf0f1; color: #7f8c8d; }
+  }
+}
+
+/* PANEL DE ACCIONES */
+.action-panel {
+  background: #fef9e7;
+  border: 1px dashed #e0c568;
+  border-radius: 8px;
+}
+
+/* ---- MODALES ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-content {
+  width: 460px;
+  max-width: 92vw;
+  border-radius: 10px;
+  background-color: #fffaf0;
+}
+
+/* ---- MODAL DE HISTORIAL ---- */
+.modal-overlay.modal-top {
+  z-index: 1080;
+}
+
+.modal-content.modal-historial {
+  width: 920px;
+  max-width: 96vw;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.accion-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  &.row-mod { background: #cfe6f5; color: #1b5278; }
+  &.row-aprobado { background: #c5e6cd; color: #15572c; }
+  &.row-rechazado { background: #f3c9c5; color: #7d241b; }
+}
+
+tr.row-mod td { background-color: #eef6fb; }
+tr.row-aprobado td { background-color: #eaf7ee; }
+tr.row-rechazado td { background-color: #fdecea; }
+
+.val-celda {
+  color: #333;
+  overflow-wrap: anywhere;
+}
+
+.page-link {
+  color: #5b1225;
+  &:hover { background-color: #fbf3d5; color: #5b1225; }
+}
+
+.page-item.active .page-link {
+  background-color: #5b1225;
+  border-color: #5b1225;
+}

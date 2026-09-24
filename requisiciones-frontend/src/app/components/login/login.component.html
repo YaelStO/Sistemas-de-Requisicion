@@ -1,0 +1,29 @@
+<div class="login-wrapper">
+  <form class="login-card" (ngSubmit)="onLogin()">
+
+    <!-- Campo Usuario -->
+    <div class="input-group">
+      <div class="icon-box">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <input type="text" class="form-control" placeholder="Usuario" autocomplete="username" [(ngModel)]="username" name="username" />
+    </div>
+
+    <!-- Campo Contrasena -->
+    <div class="input-group">
+      <div class="icon-box">
+        <i class="bi bi-lock-fill"></i>
+      </div>
+      <input type="password" class="form-control" placeholder="Contrasena" autocomplete="current-password" [(ngModel)]="password" name="password" />
+    </div>
+
+    <p class="login-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <!-- Boton -->
+    <button type="submit" class="btn btn-submit" [disabled]="loading">
+      <i class="bi bi-box-arrow-in-right me-1" *ngIf="!loading"></i>
+      {{ loading ? 'VERIFICANDO...' : 'INICIAR SESION' }}
+    </button>
+
+  </form>
+</div>

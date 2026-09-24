@@ -1,0 +1,88 @@
+<aside class="sidebar" [class.colapsada]="colapsada">
+  <div class="sidebar-header">
+    <div class="brand-icono">
+      <i class="bi bi-box-seam-fill"></i>
+    </div>
+    <div class="brand-texto">
+      <h2>ADQUISICIONES</h2>
+      <p>Portal de Control Institucional</p>
+    </div>
+    <button type="button" class="btn-toggle" (click)="toggle()"
+      [title]="colapsada ? 'Expandir menú' : 'Contraer menú'"
+      [attr.aria-label]="colapsada ? 'Expandir menú' : 'Contraer menú'">
+      <i class="bi" [class.bi-layout-sidebar-inset]="!colapsada" [class.bi-layout-sidebar-inset-reverse]="colapsada"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-menu">
+    <a class="nav-item" routerLink="/dashboard" [class.active]="activo === 'inicio'" title="Inicio">
+      <i class="bi bi-house-door icon"></i>
+      <span class="nav-texto">Inicio</span>
+    </a>
+    @if (!esMateriales) {
+      <a class="nav-item" routerLink="/nueva-requisicion" [class.active]="activo === 'nueva'" title="Nueva Requisición">
+        <i class="bi bi-file-earmark-plus icon"></i>
+        <span class="nav-texto">Nueva Requisición</span>
+      </a>
+    }
+    @if (!esDepartamento && !esMateriales) {
+      <a class="nav-item" routerLink="/bandeja-solicitudes" [class.active]="activo === 'bandeja'" title="Solicitudes Recibidas">
+        <i class="bi bi-clipboard2-check icon"></i>
+        <span class="nav-texto">Solicitudes Recibidas</span>
+      </a>
+    }
+    @if (esMateriales) {
+      <a class="nav-item" routerLink="/materiales" [class.active]="activo === 'materiales'" title="Requisiciones Aprobadas">
+        <i class="bi bi-shield-check icon"></i>
+        <span class="nav-texto">Requisiciones Aprobadas</span>
+      </a>
+      <a class="nav-item" routerLink="/materiales/proceso" [class.active]="activo === 'materiales-proceso'" title="En Proceso de Compra">
+        <i class="bi bi-truck icon"></i>
+        <span class="nav-texto">En Proceso de Compra</span>
+      </a>
+    }
+    <a class="nav-item" routerLink="/solicitudes-en-proceso" [class.active]="activo === 'proceso'" title="Mis Solicitudes en Proceso">
+      <i class="bi bi-arrow-repeat icon"></i>
+      <span class="nav-texto">Mis Solicitudes en Proceso</span>
+    </a>
+    <a class="nav-item" routerLink="/historial-eventos" [class.active]="activo === 'historial'" title="Historial Mensual">
+      <i class="bi bi-journal-bookmark icon"></i>
+      <span class="nav-texto">Historial Mensual</span>
+    </a>
+    <a class="nav-item" routerLink="/centro-notificaciones" [class.active]="activo === 'notificaciones'" title="Centro Notificaciones">
+      <i class="bi bi-bell icon"></i>
+      <span class="nav-texto">Centro Notificaciones</span>
+      @if (notificacionesCount > 0) {
+        <span class="badge" [class.badge-dot]="colapsada">{{ colapsada ? '' : notificacionesCount }}</span>
+      }
+    </a>
+    @if (esDireccionGeneral) {
+      <a class="nav-item" routerLink="/gestion-areas" [class.active]="activo === 'areas'" title="Gestión de Áreas">
+        <i class="bi bi-diagram-3 icon"></i>
+        <span class="nav-texto">Gestión de Áreas</span>
+      </a>
+      <a class="nav-item" routerLink="/gestion-usuarios" [class.active]="activo === 'usuarios'" title="Gestión de Usuarios">
+        <i class="bi bi-people icon"></i>
+        <span class="nav-texto">Gestión de Usuarios</span>
+      </a>
+    }
+    <a class="nav-item" routerLink="/cambiar-password" [class.active]="activo === 'password'" title="Cambiar contraseña">
+      <i class="bi bi-key icon"></i>
+      <span class="nav-texto">Cambiar contraseña</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-box" [title]="rolEtiqueta">
+      <span class="user-avatar">{{ inicial }}</span>
+      <div class="user-texto">
+        <p class="role">{{ rolEtiqueta }}</p>
+        <p class="user">{{ authUsuario }}</p>
+      </div>
+    </div>
+    <button type="button" class="btn-logout" (click)="cerrarSesion()" title="Cerrar sesión">
+      <i class="bi bi-box-arrow-left"></i>
+      <span class="nav-texto">Cerrar sesión</span>
+    </button>
+  </div>
+</aside>

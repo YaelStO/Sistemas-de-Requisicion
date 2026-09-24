@@ -1,0 +1,132 @@
+$guinda: #5b1225;
+$crema-tabla: #fbf3d5;
+
+.metric-card {
+  border-radius: 10px;
+  transition: transform 0.2s;
+
+  &:hover { transform: translateY(-2px); }
+
+  .metric-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+
+  .metrica-valor {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #222;
+
+    &.c-azul { color: #2980b9; }
+    &.c-verde { color: #27ae60; }
+    &.c-rojo { color: #c0392b; }
+  }
+
+  .metrica-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #777;
+    margin-top: 0.25rem;
+  }
+}
+
+.table-crema {
+  th {
+    background-color: $crema-tabla;
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.c-azul { color: #2980b9; font-weight: 600; }
+.c-verde { color: #27ae60; font-weight: 600; }
+.c-rojo { color: #c0392b; font-weight: 600; }
+
+/* SEMAFORO */
+.semaforo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1rem 0;
+
+  .semaforo-global {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 30px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+
+    .luz-punto {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    &.verde { background: #eaf7ee; color: #15572c; .luz-punto { background: #27ae60; } }
+    &.amarillo { background: #fef9e7; color: #6d5a0e; .luz-punto { background: #f1c40f; } }
+    &.rojo { background: #fdecea; color: #7d241b; .luz-punto { background: #c0392b; } }
+    &.gris { background: #ecf0f1; color: #555; .luz-punto { background: #7f8c8d; } }
+  }
+
+  .firmas-flow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .etapa {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 130px;
+
+      .etapa-icon { font-size: 1.4rem; margin-bottom: 0.2rem; }
+
+      .etapa-luz {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+
+        &.luz-espera { background: #f1c40f; }
+        &.luz-proceso { background: #2980b9; }
+        &.luz-libre { background: #27ae60; }
+      }
+
+      .etapa-nombre { font-size: 0.75rem; font-weight: 600; color: #333; }
+      .etapa-num { font-size: 0.7rem; color: #999; text-transform: uppercase; }
+    }
+
+    .flecha { font-size: 1.2rem; color: #bbb; }
+  }
+}
+
+.folio {
+  font-weight: 700;
+  color: $guinda;
+}
+
+.empty-state {
+  color: #888;
+  text-align: center;
+  padding: 2rem 0;
+  font-size: 0.85rem;
+}
+
+/* badges de estado por nivel */
+.badge-estado {
+  &.aprobado { background-color: #27ae60; }
+  &.pendiente { background-color: #f39c12; }
+  &.rechazado { background-color: #c0392b; }
+  &.na { background-color: #95a5a6; }
+  &.en-revision { background-color: #2980b9; }
+}

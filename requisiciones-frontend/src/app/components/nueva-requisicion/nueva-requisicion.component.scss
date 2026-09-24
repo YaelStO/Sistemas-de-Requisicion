@@ -1,0 +1,31 @@
+.table-crema {
+  th {
+    background-color: #fbf3d5;
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem 0;
+  &.text-guinda { color: #5b1225; }
+  &.text-red { color: #b02a37; }
+}
+
+/* ZONA DRAG AND DROP */
+.drop-zone {
+  border: 2px dashed #f1b0b7;
+  background-color: #fdf5f6;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover { border-color: #5b1225; }
+
+  .drag-text { font-size: 0.85rem; font-weight: 600; color: #333; margin: 0.5rem 0 0; }
+  .sub-drag { font-size: 0.7rem; color: #888; margin: 0.25rem 0 0; }
+}

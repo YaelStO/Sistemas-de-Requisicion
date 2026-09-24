@@ -1,0 +1,103 @@
+<div class="dashboard-layout">
+  <app-sidebar activo="historial" />
+
+  <main class="content-area">
+    <header class="main-header">
+      <div>
+        <h1>Bitacora de Eventos de Auditoria</h1>
+        <p class="subtext">Historial mensual de acciones sobre las requisiciones</p>
+      </div>
+      <div class="header-right">
+        <i class="bi bi-building"></i>
+        <span class="brand-text">Gobierno de Mexico</span>
+      </div>
+    </header>
+
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <div class="card border-0 shadow-sm p-4">
+      <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+        <label class="form-label mb-0 fw-semibold text-muted small">
+          <i class="bi bi-search me-1"></i>Requisicion:
+        </label>
+        <select class="form-select" style="max-width:350px" (change)="onSeleccion($event)">
+          @for (r of requesiciones; track r.id) {
+            <option [value]="r.id" [selected]="r.folio === folioActual">{{ r.folio }} · {{ r.material }}</option>
+          }
+        </select>
+        <span class="badge bg-warning text-dark px-3 py-2" style="border-radius:20px; font-size:0.75rem;">
+          <i class="bi bi-hash me-1"></i>Folio actual: {{ folioActual || '---' }}
+        </span>
+      </div>
+
+      @if (cargando) {
+        <div class="text-center text-muted py-4">
+          <div class="spinner-border text-secondary me-2" role="status"></div>
+          Cargando eventos...
+        </div>
+      } @else if (eventos.length === 0) {
+        <p class="text-center text-muted py-4">
+          <i class="bi bi-inbox me-1"></i>No hay eventos registrados para esta requisicion.
+        </p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" style="font-size:0.78rem">
+            <thead class="table-crema">
+              <tr>
+                <th><i class="bi bi-clock me-1"></i>Fecha / Hora</th>
+                <th><i class="bi bi-person me-1"></i>Usuario</th>
+                <th><i class="bi bi-shield me-1"></i>Rol</th>
+                <th><i class="bi bi-lightning me-1"></i>Accion</th>
+                <th><i class="bi bi-tag me-1"></i>Campo</th>
+                <th>V. Anterior</th>
+                <th>V. Nuevo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of eventosPagina; track e.id) {
+                <tr [class]="filaClase(e)">
+                  <td><i class="bi bi-calendar3 me-1 text-muted"></i>{{ formatFecha(e.fechaHora) }}</td>
+                  <td>{{ e.usuario }}</td>
+                  <td>{{ e.rol }}</td>
+                  <td>
+                    <span class="badge rounded-pill accion-chip" [ngClass]="filaClase(e)">{{ e.accion }}</span>
+                  </td>
+                  <td>{{ e.campo }}</td>
+                  <td class="val-celda">{{ e.valorAnterior || '---' }}</td>
+                  <td class="val-celda">{{ e.valorNuevo || '---' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (paginas.length > 1) {
+          <nav class="d-flex justify-content-end mt-3">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="pagActual === 1">
+                <button type="button" class="page-link" (click)="irPagina(pagActual - 1)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              @for (p of paginas; track p) {
+                <li class="page-item" [class.active]="p === pagActual">
+                  <button type="button" class="page-link" (click)="irPagina(p)">{{ p }}</button>
+                </li>
+              }
+              <li class="page-item" [class.disabled]="pagActual === paginas.length">
+                <button type="button" class="page-link" (click)="irPagina(pagActual + 1)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        }
+      }
+    </div>
+  </main>
+</div>

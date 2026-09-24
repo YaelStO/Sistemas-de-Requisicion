@@ -1,0 +1,445 @@
+<div class="dashboard-layout">
+  <app-sidebar activo="bandeja" />
+
+  <main class="content-area">
+    <header class="main-header">
+      <div>
+        <h1>Autorizacion de Requisicion</h1>
+        <p class="subtext">Revision y firma en el flujo de adquisiciones</p>
+      </div>
+      <div class="header-right">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="volver()">
+          <i class="bi bi-arrow-left me-1"></i>Volver
+        </button>
+      </div>
+    </header>
+
+    @if (mensaje) {
+      <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {{ mensaje }}
+      </div>
+    }
+    @if (error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    @if (cargando) {
+      <div class="card border-0 shadow-sm p-4">
+        <div class="text-center text-muted">
+          <div class="spinner-border text-secondary me-2" role="status"></div>
+          Cargando requisicion...
+        </div>
+      </div>
+    } @else if (requisicion) {
+      <!-- ENCABEZADO DE LA REQUISICION -->
+      <section class="card border-0 shadow-sm mb-4 req-header-card">
+        <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <h2 class="mb-0" style="color:#5b1225">{{ requisicion.folio }}</h2>
+            <p class="mb-0 fw-semibold">{{ requisicion.material }}</p>
+          </div>
+          <div class="d-grid" style="grid-template-columns: 1fr 1fr; gap: 0.25rem 2rem; font-size:0.8rem; color:#555;">
+            <p class="mb-0"><i class="bi bi-person me-1 text-muted"></i><span class="text-muted">Solicitante:</span> {{ requisicion.nombreSolicitante }}</p>
+            <p class="mb-0"><i class="bi bi-building me-1 text-muted"></i><span class="text-muted">Area:</span> {{ requisicion.area }}</p>
+            <p class="mb-0"><i class="bi bi-calendar-event me-1 text-muted"></i><span class="text-muted">Fecha requerida:</span> {{ requisicion.fechaRequerida }}</p>
+            <p class="mb-0"><i class="bi bi-calendar-check me-1 text-muted"></i><span class="text-muted">Fecha de solicitud:</span> {{ requisicion.fechaSolicitud }}</p>
+          </div>
+          <span class="badge bg-warning text-dark px-3 py-2" style="font-size:0.8rem; border-radius:20px;">
+            {{ estadoGlobalEtiqueta() }}
+          </span>
+        </div>
+      </section>
+
+      <!-- FIRMAS JERARQUICAS -->
+      <section class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 firma-card" [class]="nivelClase(requisicion.estadoCoord)">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-people-fill me-2 fs-5"></i>
+                <h4 class="mb-0" style="font-size:0.9rem">Coordinacion</h4>
+              </div>
+              <span class="badge estado-nivel">{{ nivelNombre(requisicion.estadoCoord) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 firma-card" [class]="nivelClase(requisicion.estadoDir)">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-person-workspace me-2 fs-5"></i>
+                <h4 class="mb-0" style="font-size:0.9rem">Direccion de Area</h4>
+              </div>
+              <span class="badge estado-nivel">{{ nivelNombre(requisicion.estadoDir) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 firma-card" [class]="nivelClase(requisicion.estadoDirGral)">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-briefcase-fill me-2 fs-5"></i>
+                <h4 class="mb-0" style="font-size:0.9rem">Direccion General</h4>
+              </div>
+              <span class="badge estado-nivel">{{ nivelNombre(requisicion.estadoDirGral) }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESUMEN -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-guinda">
+          <i class="bi bi-info-circle me-2"></i>Detalle de la requisicion
+        </h3>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Partida</label>
+            <input class="form-control" [value]="requisicion.partidaCodigo + ' · ' + requisicion.partidaNombre" readonly />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Cantidad</label>
+            <input class="form-control" [value]="requisicion.cantidad + ' ' + requisicion.unidad" readonly />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Precio estimado unitario</label>
+            <input class="form-control" [value]="formatMoney(requisicion.precioEstimado)" readonly />
+          </div>
+          <div class="col-md-8">
+            <label class="form-label small text-muted">Descripcion de caracteristicas</label>
+            <input class="form-control" [value]="requisicion.descripcion || '---'" readonly />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">Total estimado</label>
+            <input class="form-control fw-bold" [value]="formatMoney((requisicion.precioEstimado ?? 0) * (requisicion.cantidad ?? 0))" readonly />
+          </div>
+          <div class="col-12">
+            <label class="form-label small text-muted">Justificacion de compra</label>
+            <input class="form-control" [value]="requisicion.justificacion || '---'" readonly />
+          </div>
+        </div>
+      </section>
+
+      @if (requisicion.justificacionRechazo) {
+        <section class="card border-0 shadow-sm p-4 mb-4 border-start border-danger border-4">
+          <h3 class="section-title text-red">
+            <i class="bi bi-x-octagon me-2"></i>Motivo de rechazo
+          </h3>
+          <div class="alert alert-danger mb-0">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ requisicion.justificacionRechazo }}
+          </div>
+        </section>
+      }
+
+      <!-- SUGERENCIAS / COTIZACIONES -->
+      <section class="card border-0 shadow-sm p-4 mb-4">
+        <h3 class="section-title text-red">
+          <i class="bi bi-lightbulb me-2"></i>Sugerencias de adquisicion
+        </h3>
+        @if (requisicion.sugerencias.length === 0) {
+          <p class="text-center text-muted py-3">
+            <i class="bi bi-inbox me-1"></i>Sin sugerencias registradas.
+          </p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-crema">
+                <tr>
+                  <th>Marca</th>
+                  <th>Modelo</th>
+                  <th>Precio</th>
+                  <th>Enlace</th>
+                  <th>PDF</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of requisicion.sugerencias; track s.id ?? $index) {
+                  <tr>
+                    <td>{{ s.marca || '-' }}</td>
+                    <td>{{ s.modelo || '-' }}</td>
+                    <td>{{ formatMoney(s.precioEstimado) }}</td>
+                    <td>
+                      @if (s.enlaceUrl) {
+                        <a [href]="s.enlaceUrl" target="_blank" class="text-decoration-none">
+                          <i class="bi bi-box-arrow-up-right me-1"></i>{{ s.enlaceUrl }}
+                        </a>
+                      } @else { - }
+                    </td>
+                    <td>
+                      @if (s.archivoPdfUrl) {
+                        <a href="javascript:void(0)" (click)="verPdf(s.archivoPdfUrl!)" class="text-decoration-none text-danger">
+                          <i class="bi bi-file-earmark-pdf me-1"></i>{{ s.archivoPdfNombre || 'Ver PDF' }}
+                        </a>
+                      } @else { - }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <!-- PANEL DE ACCIONES -->
+      @if (esMiTurno || puedeModificar) {
+        <section class="card border-0 shadow-sm p-4 mb-4 action-panel">
+          <h3 class="d-flex align-items-center mb-3" style="font-size:0.95rem; color:#6d5a0e;">
+            <i class="bi bi-gear-wide-connected me-2"></i>Acciones de autorizacion
+          </h3>
+          @if (esMiTurno) {
+            <div class="d-flex gap-2 flex-wrap mb-2">
+              <button type="button" class="btn btn-danger" (click)="abrirModalRechazo()">
+                <i class="bi bi-x-lg me-1"></i>Rechazar con Justificacion
+              </button>
+              <button type="button" class="btn btn-teal" (click)="abrirModalAprobacion()">
+                <i class="bi bi-check-lg me-1"></i>Liberar Orden y Autorizar
+              </button>
+            </div>
+          }
+          @if (puedeModificar) {
+            <button type="button" class="btn btn-burgundy" (click)="editando ? guardarEdicion() : iniciarEdicion()">
+              <i class="bi me-1" [class.bi-pencil-square]="!editando" [class.bi-check2-all]="editando"></i>
+              {{ editando ? 'Guardar Modificaciones' : 'Modificar' }}
+            </button>
+          }
+          <button type="button" class="btn btn-outline-secondary btn-sm ms-2" (click)="abrirHistorial()">
+            <i class="bi bi-clock-history me-1"></i>Ver Modificaciones
+          </button>
+        </section>
+      }
+
+      <!-- MODO EDICION -->
+      @if (editando) {
+        <section class="card border-0 shadow-sm p-4 mb-4">
+          <h3 class="section-title text-guinda">
+            <i class="bi bi-pencil-square me-2"></i>Modificar requisicion
+          </h3>
+          <form [formGroup]="editForm" (ngSubmit)="guardarEdicion()">
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label small text-muted">Material</label>
+                <input type="text" class="form-control" formControlName="material" />
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">Cantidad</label>
+                <input type="number" class="form-control" formControlName="cantidad" min="1" />
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">Unidad</label>
+                <input type="text" class="form-control" formControlName="unidad" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Precio estimado unitario</label>
+                <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput placeholder="0.00" />
+              </div>
+              <div class="col-12">
+                <label class="form-label small text-muted">Descripcion</label>
+                <input type="text" class="form-control" formControlName="descripcion" />
+              </div>
+              <div class="col-12">
+                <label class="form-label small text-muted">Justificacion</label>
+                <input type="text" class="form-control" formControlName="justificacion" />
+              </div>
+            </div>
+
+            <h5 class="mt-4 mb-3" style="font-size:0.9rem; color:#5b1225;">
+              <i class="bi bi-lightbulb me-1"></i>Sugerencias
+            </h5>
+            <div formArrayName="sugerencias">
+              @for (sug of sugerencias.controls; track sug; let i = $index) {
+                <div class="row g-3 mt-2 p-3 border rounded bg-light" [formGroupName]="i">
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Marca <span class="text-muted">(máx. {{ maxMarca }})</span></label>
+                    <input type="text" class="form-control" formControlName="marca" maxlength="300" />
+                    @if (sug.get('marca')?.invalid && sug.get('marca')?.touched) {
+                      <div class="invalid-feedback d-block">Máximo 300 caracteres.</div>
+                    }
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Modelo <span class="text-muted">(máx. {{ maxModelo }})</span></label>
+                    <input type="text" class="form-control" formControlName="modelo" maxlength="200" />
+                    @if (sug.get('modelo')?.invalid && sug.get('modelo')?.touched) {
+                      <div class="invalid-feedback d-block">Máximo 200 caracteres.</div>
+                    }
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Precio</label>
+                    <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput placeholder="0.00" />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small text-muted">Enlace</label>
+                    <input type="text" class="form-control" formControlName="enlaceUrl" placeholder="https://..." />
+                    @if (sug.get('enlaceUrl')?.invalid && sug.get('enlaceUrl')?.touched) {
+                      <div class="invalid-feedback d-block">Ingresa una URL válida (ej. https://www.ejemplo.com)</div>
+                    }
+                  </div>
+                  <div class="col-12">
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarSugerenciaEdit(i)">
+                      <i class="bi bi-trash me-1"></i>Eliminar sugerencia
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+            <button type="button" class="btn btn-teal mt-3" (click)="agregarSugerenciaEdit()">
+              <i class="bi bi-plus-circle me-1"></i>Agregar sugerencia
+            </button>
+
+            <div class="d-flex gap-2 mt-4 justify-content-end">
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicion()">
+                <i class="bi bi-x-lg me-1"></i>Cancelar
+              </button>
+              <button type="submit" class="btn btn-burgundy">
+                <i class="bi bi-check2-all me-1"></i>Guardar modificaciones
+              </button>
+            </div>
+          </form>
+        </section>
+      }
+
+      <!-- MODAL DE RECHAZO -->
+      @if (mostrarModalRechazo) {
+        <div class="modal-overlay" (click)="mostrarModalRechazo = false">
+          <div class="modal-content border-0 shadow" style="border-radius:12px; border-top:4px solid #c0392b;" (click)="$event.stopPropagation()">
+            <div class="modal-header border-0">
+              <h5 class="modal-title d-flex align-items-center">
+                <i class="bi bi-x-octagon text-danger me-2"></i>Rechazar requisicion
+              </h5>
+              <button type="button" class="btn-close" (click)="mostrarModalRechazo = false"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-muted small">Indica el motivo por el cual se rechaza esta solicitud. El historial quedara registrado.</p>
+              <textarea [(ngModel)]="justificacionRechazo" class="form-control" rows="4" placeholder="Escribe la justificacion del rechazo..."></textarea>
+            </div>
+            <div class="modal-footer border-0">
+              <button type="button" class="btn btn-outline-secondary" (click)="mostrarModalRechazo = false">Cancelar</button>
+              <button type="button" class="btn btn-danger" (click)="confirmarRechazo()">
+                <i class="bi bi-x-lg me-1"></i>Confirmar rechazo
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- MODAL DE APROBACION -->
+      @if (mostrarModalAprobacion) {
+        <div class="modal-overlay" (click)="mostrarModalAprobacion = false">
+          <div class="modal-content border-0 shadow" style="border-radius:12px; border-top:4px solid #235b4e;" (click)="$event.stopPropagation()">
+            <div class="modal-header border-0">
+              <h5 class="modal-title d-flex align-items-center">
+                <i class="bi bi-check-circle text-success me-2"></i>Liberar orden y autorizar
+              </h5>
+              <button type="button" class="btn-close" (click)="mostrarModalAprobacion = false"></button>
+            </div>
+            <div class="modal-body">
+              <div class="alert alert-warning d-flex align-items-center mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Al aprobar se libera el pedido al siguiente nivel de autorizacion (o al area de Materiales si es el ultimo).
+              </div>
+            </div>
+            <div class="modal-footer border-0">
+              <button type="button" class="btn btn-outline-secondary" (click)="mostrarModalAprobacion = false">Cancelar</button>
+              <button type="button" class="btn btn-teal" (click)="confirmarAprobacion()">
+                <i class="bi bi-check-lg me-1"></i>Confirmar aprobacion
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- MODAL DE HISTORIAL (solo de esta requisicion) -->
+      @if (mostrarHistorial) {
+        <div class="modal-overlay modal-top" (click)="cerrarHistorial()">
+          <div class="modal-content modal-historial border-0 shadow" (click)="$event.stopPropagation()">
+            <div class="modal-header border-0 d-flex justify-content-between align-items-center">
+              <h5 class="modal-title d-flex align-items-center" style="color:#5b1225;">
+                <i class="bi bi-journal-bookmark me-2"></i>Bitacora · {{ requisicion.folio }}
+              </h5>
+              <button type="button" class="btn-close" (click)="cerrarHistorial()"></button>
+            </div>
+            <div class="modal-body">
+              @if (errorHistorial) {
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorHistorial }}
+                </div>
+              }
+              @if (cargandoHistorial) {
+                <div class="text-center text-muted py-4">
+                  <div class="spinner-border text-secondary me-2" role="status"></div>
+                  Cargando historial...
+                </div>
+              } @else if (historialEventos.length === 0) {
+                <p class="text-center text-muted py-4">
+                  <i class="bi bi-inbox me-1"></i>Sin eventos registrados para esta requisicion.
+                </p>
+              } @else {
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0" style="font-size:0.78rem">
+                    <thead class="table-crema">
+                      <tr>
+                        <th><i class="bi bi-clock me-1"></i>Fecha / Hora</th>
+                        <th><i class="bi bi-person me-1"></i>Usuario</th>
+                        <th><i class="bi bi-shield me-1"></i>Rol</th>
+                        <th><i class="bi bi-lightning me-1"></i>Accion</th>
+                        <th><i class="bi bi-tag me-1"></i>Campo</th>
+                        <th>V. Anterior</th>
+                        <th>V. Nuevo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (e of historialEventosPagina; track e.id) {
+                        <tr [class]="filaClaseHistorial(e)">
+                          <td><i class="bi bi-calendar3 me-1 text-muted"></i>{{ formatFechaHistorial(e.fechaHora) }}</td>
+                          <td>{{ e.usuario }}</td>
+                          <td>{{ e.rol }}</td>
+                          <td><span class="badge rounded-pill accion-chip" [ngClass]="filaClaseHistorial(e)">{{ e.accion }}</span></td>
+                          <td>{{ e.campo }}</td>
+                          <td class="val-celda">{{ e.valorAnterior || '---' }}</td>
+                          <td class="val-celda">{{ e.valorNuevo || '---' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                @if (paginasHistorial.length > 1) {
+                  <nav class="d-flex justify-content-end mt-3">
+                    <ul class="pagination pagination-sm mb-0">
+                      <li class="page-item" [class.disabled]="pagHistorial === 1">
+                        <button type="button" class="page-link" (click)="irPaginaHistorial(pagHistorial - 1)">
+                          <i class="bi bi-chevron-left"></i>
+                        </button>
+                      </li>
+                      @for (p of paginasHistorial; track p) {
+                        <li class="page-item" [class.active]="p === pagHistorial">
+                          <button type="button" class="page-link" (click)="irPaginaHistorial(p)">{{ p }}</button>
+                        </li>
+                      }
+                      <li class="page-item" [class.disabled]="pagHistorial === paginasHistorial.length">
+                        <button type="button" class="page-link" (click)="irPaginaHistorial(pagHistorial + 1)">
+                          <i class="bi bi-chevron-right"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                }
+              }
+
+              <div class="d-flex gap-2 mt-3 justify-content-between align-items-center flex-wrap">
+                <span class="text-muted small">
+                  <i class="bi bi-info-circle me-1"></i>Historial exclusivo de esta requisicion.
+                  <a href="javascript:void(0)" class="text-decoration-none" (click)="verHistorial()">Abrir en el historial general</a>.
+                </span>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cerrarHistorial()">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </main>
+</div>

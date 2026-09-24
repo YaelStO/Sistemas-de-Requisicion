@@ -1,0 +1,206 @@
+.table-crema {
+  th {
+    background-color: #fbf3d5;
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.btn-filtro {
+  background-color: #ecf0f1;
+  border: 1px solid #d5dbdb;
+  color: #444;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  cursor: pointer;
+
+  &:hover { background-color: #d5dbdb; }
+
+  &.activo {
+    background-color: #5b1225;
+    border-color: #5b1225;
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.folio {
+  font-weight: 700;
+  color: #5b1225;
+}
+
+.badge-estado {
+  &.aprobado { background-color: #27ae60; }
+  &.pendiente { background-color: #f39c12; }
+  &.rechazado { background-color: #c0392b; }
+  &.na { background-color: #95a5a6; }
+  &.en-revision { background-color: #2980b9; }
+}
+
+/* ===== MODAL SOBREPUESTO ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 12, 18, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.modal-content {
+  width: 520px;
+  max-width: 96vw;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  background-color: #fffaf0;
+  border: none;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+
+  &.modal-large {
+    width: 860px;
+  }
+}
+
+.modal-header.bg-crema {
+  background-color: #fbf3d5 !important;
+  border-bottom: 1px solid #e8d9a8;
+  border-radius: 16px 16px 0 0;
+  padding: 1.1rem 1.25rem;
+}
+
+.text-guinda {
+  color: #5b1225;
+}
+
+/* ===== METRICAS MATERIALES ===== */
+.metric-material {
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f4f8f5, #ffffff);
+
+  .metric-icon { font-size: 1.5rem; }
+
+  .metrica-valor {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e7a3a;
+    display: block;
+  }
+
+  .metrica-label {
+    font-size: 0.72rem;
+    color: #777;
+    font-weight: 600;
+  }
+}
+
+.partida-select {
+  min-width: 260px;
+  max-width: 320px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+/* ===== NAVEGACION POR NIVELES (reemplaza el arbol desplegable) ===== */
+.breadcrumb-nav {
+  .breadcrumb {
+    background-color: #faf6ea;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+
+    .breadcrumb-item {
+      font-size: 0.8rem;
+
+      a {
+        color: #5b1225;
+        text-decoration: none;
+        cursor: pointer;
+
+        &:hover { text-decoration: underline; }
+      }
+
+      &.active { color: #8a6d1a; font-weight: 700; }
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+      color: #a5936a;
+    }
+  }
+}
+
+.subtitle-nivel {
+  color: #5b1225;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.area-card {
+  cursor: pointer;
+  background-color: #fffdf6;
+  border: 1px solid #f0e4c2 !important;
+  border-radius: 12px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+
+  .area-icono { font-size: 1.6rem; color: #5b1225; }
+
+  .area-nombre { color: #5b1225; }
+
+  .nivel-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.28rem 0.7rem;
+    border-radius: 20px;
+
+    &.dg { background-color: #5b1225; color: #fff; }
+    &.dir { background-color: #e8d9a8; color: #5b1225; }
+    &.coord { background-color: #cfe6f5; color: #1b5278; }
+    &.depto { background-color: #eaf7ee; color: #1e7a3a; }
+  }
+
+  .total-badge { font-weight: 600; }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(91, 18, 37, 0.12);
+    border-color: #d9c58a !important;
+  }
+}
+
+/* ===== HISTORIAL EN MODAL ===== */
+.modal-overlay.modal-top {
+  z-index: 1080;
+}
+
+.accion-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  &.row-mod { background: #cfe6f5; color: #1b5278; }
+  &.row-aprobado { background: #c5e6cd; color: #15572c; }
+  &.row-rechazado { background: #f3c9c5; color: #7d241b; }
+}
+
+tr.row-mod td { background-color: #eef6fb; }
+tr.row-aprobado td { background-color: #eaf7ee; }
+tr.row-rechazado td { background-color: #fdecea; }
+
+.val-celda {
+  color: #333;
+  overflow-wrap: anywhere;
+}
+
+.page-link {
+  color: #5b1225;
+  &:hover { background-color: #fbf3d5; color: #5b1225; }
+}
+
+.page-item.active .page-link {
+  background-color: #5b1225;
+  border-color: #5b1225;
+}

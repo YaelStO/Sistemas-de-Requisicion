@@ -1,0 +1,77 @@
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notif-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  border-left: 5px solid #ccc;
+  background-color: #fff;
+
+  &.tipo-aprobacion { border-left-color: #27ae60; }
+  &.tipo-rechazo { border-left-color: #c0392b; }
+  &.tipo-modificacion { border-left-color: #f1c40f; }
+}
+
+.notif-icon {
+  font-size: 1.3rem;
+  color: #5b1225;
+  display: flex;
+  align-items: center;
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.folio {
+  font-weight: 700;
+  color: #5b1225;
+}
+
+.accion {
+  font-weight: 600;
+  color: #333;
+}
+
+.fecha {
+  margin-left: auto;
+  color: #777;
+  font-size: 0.75rem;
+}
+
+.quien {
+  font-size: 0.8rem;
+  color: #444;
+}
+
+.detalle {
+  font-size: 0.8rem;
+  background: #fbf3d5;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.antes {
+  color: #a93226;
+  text-decoration: line-through;
+}
+
+.ahora {
+  color: #1e7a3a;
+  font-weight: 600;
+}

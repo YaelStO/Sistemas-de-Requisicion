@@ -1,0 +1,140 @@
+<div class="dashboard-layout">
+  <app-sidebar activo="usuarios" />
+
+  <main class="content-area">
+  <header class="panel-header">
+    <h1><i class="bi bi-people-fill me-2"></i>Gestion de Usuarios</h1>
+    <p class="subtext">Solo registra el nombre completo, rol y area: el sistema genera usuario y contraseña temporal</p>
+  </header>
+
+  @if (mensaje) {
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      {{ mensaje }}
+    </div>
+  }
+  @if (error) {
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      {{ error }}
+    </div>
+  }
+  @if (credenciales) {
+    <div class="alert alert-warning">
+      <i class="bi bi-key me-2"></i>
+      <strong>Credenciales generadas</strong>
+      <div class="mt-2">
+        <div><strong>Usuario:</strong> <span class="text-monospace">{{ credenciales.username }}</span></div>
+        <div><strong>Contraseña temporal:</strong> <span class="text-monospace">{{ credenciales.passwordTemporal }}</span></div>
+        <small class="text-muted">El usuario deberá cambiarla dentro de las primeras <strong>48 horas</strong> al iniciar sesión.</small>
+      </div>
+    </div>
+  }
+
+  <section class="card border-0 shadow-sm p-4 mb-4">
+    <h3 class="section-title">
+      <i class="bi bi-person-plus me-2"></i>Crear nuevo usuario
+    </h3>
+    <form [formGroup]="usuariosForm" (ngSubmit)="crear()">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label small text-muted">Nombre completo</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+            <input type="text" class="form-control" formControlName="nombreCompleto" placeholder="ej. Juan Carlos Perez Garcia" />
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small text-muted">Rol</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+            <select class="form-select" formControlName="rol">
+              @for (rol of roles; track rol.valor) {
+                <option [value]="rol.valor">{{ rol.etiqueta }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small text-muted">Area del organigrama</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-building"></i></span>
+            <select class="form-select" formControlName="areaId">
+              @if (esMateriales) {
+                <option [ngValue]="null">Sin area (panel de Materiales)</option>
+              } @else {
+                <option [ngValue]="null" disabled>Selecciona un area</option>
+              }
+              @for (a of areas; track a.id) {
+                <option [ngValue]="a.id">{{ a.nombre }} ({{ a.nivel }})</option>
+              }
+            </select>
+          </div>
+          @if (esMateriales) {
+            <small class="form-text text-muted">El rol Materiales no necesita area: gestiona el panel de compras.</small>
+          }
+        </div>
+      </div>
+      <button type="submit" class="btn btn-burgundy mt-3">
+        <i class="bi bi-plus-circle me-1"></i>Crear usuario
+      </button>
+    </form>
+  </section>
+
+  <section class="card border-0 shadow-sm p-4">
+    <h3 class="section-title">
+      <i class="bi bi-people me-2"></i>Usuarios registrados
+    </h3>
+    @if (cargando) {
+      <div class="text-center text-muted py-3">
+        <div class="spinner-border text-secondary me-2" role="status"></div>
+        Cargando...
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-crema">
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Area</th>
+              <th>Contraseña</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of usuarios; track u.id) {
+              <tr>
+                <td>{{ u.id }}</td>
+                <td><i class="bi bi-person me-1 text-muted"></i>{{ u.username }}</td>
+                <td>{{ u.nombreCompleto }}</td>
+                <td><span class="badge bg-secondary">{{ u.rol }}</span></td>
+                <td>{{ u.area ?? '---' }}</td>
+                <td>
+                  @if (u.passwordExpirada) {
+                    <span class="badge bg-warning text-dark"><i class="bi bi-alarm me-1"></i>Cambio pendiente (48 h)</span>
+                  } @else {
+                    <span class="badge bg-success">Actualizada</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge" [class.bg-success]="u.activo" [class.bg-danger]="!u.activo">
+                    <i class="bi me-1" [class.bi-check-circle]="u.activo" [class.bi-x-circle]="!u.activo"></i>
+                    {{ u.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                  <button type="button" class="btn btn-sm btn-outline-secondary ms-1" (click)="toggleActivo(u)">
+                    <i class="bi me-1" [class.bi-toggle-on]="u.activo" [class.bi-toggle-off]="!u.activo"></i>
+                    {{ u.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+  </main>
+</div>
