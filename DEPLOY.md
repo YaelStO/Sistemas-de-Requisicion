@@ -4,6 +4,14 @@ Este proyecto ya está preparado. Solo sigue los pasos en orden: **1) GitHub →
 
 ---
 
+Los URLs del despliegue actual son:
+
+- **Backend (Render):** `https://sistemas-de-requisicion.onrender.com`
+- **Frontend (Vercel):** `https://requisiciones-frontend.vercel.app`
+- **Login:** `https://requisiciones-frontend.vercel.app/login`
+
+---
+
 ## 1. Subir el proyecto a GitHub
 
 El código está en `requisiciones-backend` y `requisiciones-frontend`. Súbelo a un repo nuevo:
@@ -52,15 +60,15 @@ El `Dockerfile` y el `render.yaml` están **en la raíz del repo** (Render los b
 | `DB_USERNAME` | `postgres.<PROJECT-REF>` |
 | `DB_PASSWORD` | la password de tu Supabase |
 | `JWT_SECRET` | una cadena larga que inventes (mínimo 32 caracteres) |
-| `APP_BASE_URL` | `https://REEMPLAZA-CON-TU-BACKEND.onrender.com` (lo llenas después de crear el servicio) |
-| `CORS_ALLOWED_ORIGINS` | `http://localhost:4200,https://TU-APP.vercel.app` (la URL final de Vercel) |
+| `APP_BASE_URL` | `https://sistemas-de-requisicion.onrender.com` |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:4200,http://localhost:4000,https://requisiciones-frontend.vercel.app` |
 
 **Opcion B — Manual:** New → **Web Service** → conecta el repo → **deja el Root Directory en la raíz del repo** (no lo cambies) → Runtime **Docker**: Render usa solo el `./Dockerfile` de la raíz → define las mismas variables → **Health Check Path:** `/api/v1/catalogo/partidas`.
 
 Luego:
-1. Copia la URL final (`https://xxxxxxxx.onrender.com`).
-2. Actualiza `APP_BASE_URL` con esa URL (los enlaces de PDF que guarda el backend las usan).
-3. Añade la URL de Vercel a `CORS_ALLOWED_ORIGINS`.
+1. Copia la URL final (`https://sistemas-de-requisicion.onrender.com`).
+2. Actualiza `APP_BASE_URL` con esa URL (los enlaces de PDF que guarda el backend las usan) — ya está definida en `render.yaml`.
+3. Añade la URL de Vercel a `CORS_ALLOWED_ORIGINS` — ya está definida en `render.yaml`.
 4. Redespliega para aplicar los cambios.
 
 > **Nota importante:** el plan gratuito de Render tiene disco efímero. Los PDFs que se suben se pierden al redesplegar. Si te importan, contrata un **Persisted Disk** de Render (ajusta `UPLOAD_DIR` a la ruta del disco) o usa **Supabase Storage**.
@@ -74,7 +82,7 @@ Luego:
    ```ts
    export const environment = {
      production: true,
-     apiUrl: 'https://xxxxxxxx.onrender.com/api/v1'
+     apiUrl: 'https://sistemas-de-requisicion.onrender.com/api/v1'
    };
    ```
 
