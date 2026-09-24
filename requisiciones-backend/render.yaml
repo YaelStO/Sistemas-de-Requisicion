@@ -1,0 +1,34 @@
+# Render Blueprint — Backend (Spring Boot)
+# 1) Sube el repo a GitHub y en Render elige "New > Blueprint" apuntando a este archivo.
+# 2) Render te pedirá completar las variables marcadas con "sync: false".
+# 3) Después de crear el servicio, copia la URL (https://xxx.onrender.com) en
+#    APP_BASE_URL y en CORS_ALLOWED_ORIGINS (junto a la URL de Vercel).
+
+services:
+  - type: web
+    name: requisiciones-backend
+    runtime: docker
+    rootDir: requisiciones-backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/v1/catalogo/partidas
+    autoDeploy: true
+    envVars:
+      # --- Conexión a Supabase (Postgres) ---
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # --- Seguridad del backend ---
+      - key: JWT_SECRET
+        sync: false
+      # --- URLs públicas ---
+      - key: APP_BASE_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: http://localhost:4200,http://localhost:4000
+      # --- Subida de PDFs (disco efímero en Render) ---
+      - key: UPLOAD_DIR
+        value: /tmp/uploads/cotizaciones

@@ -1,0 +1,51 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: requisiciones-backend
+
+  datasource:
+    # Local:    jdbc:postgresql://localhost:5432/requisiciones_db
+    # Supabase: jdbc:postgresql://<host>:5432/postgres?sslmode=require
+    #   (o puerto 6543 con el Pooler: usa el usuario postgres.<project-ref>)
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/requisiciones_db}
+    username: ${DB_USERNAME:admin_requisiciones}
+    password: ${DB_PASSWORD:Requi123q}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: true
+      # Requerido por el Transaction Pooler de Supabase (PgBouncer)
+      # Si usas la conexión directa (puerto 5432) puedes omitirlo.
+      hibernate.connection.provider_disables_autocommit: ${HIBERNATE_DISABLE_AUTOCOMMIT:false}
+
+  sql:
+    init:
+      mode: always
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+app:
+  # URL pública con la que Render expone este backend (para enlaces de archivos).
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  upload:
+    # En Render el disco es efímero: /tmp funciona pero el contenido se pierde al
+    # redesplegar. Si necesitas persistencia, contrata un Disco de Render o usa
+    # Supabase Storage (ver DEPLOY.md).
+    dir: ${UPLOAD_DIR:/home/yaeldjso/Documentos/Sistema de Requerimientos/uploads/cotizaciones/}
+  jwt:
+    # IMPORTANTE: en producción define JWT_SECRET con un valor propio (mín. 32 caracteres).
+    secret: ${JWT_SECRET:LS9mY2VsM2x1dG9uLTMxMjctcmVxdWlzaWNpb25lcy1zdXBlci1zZWNyZXRvLWF1dGhAMjAyNg==}
+    expiration: ${JWT_EXPIRATION_MS:86400000}
+  cors:
+    # Orígenes permitidos separados por coma. Incluye tu app de Vercel.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:4000,http://127.0.0.1:4200}
