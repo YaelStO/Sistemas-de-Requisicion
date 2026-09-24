@@ -42,7 +42,9 @@ git push -u origin main
 
 ## 3. Render (el backend Spring Boot)
 
-**Opcion A — Blueprint (recomendado):** Dashboard de Render → **New → Blueprint** → conecta el repo → Render leerá `requisiciones-backend/render.yaml` y te pedirá llenar estas variables:
+El `Dockerfile` y el `render.yaml` están **en la raíz del repo** (Render los busca ahí), así que:
+
+**Opcion A — Blueprint (recomendado):** Dashboard de Render → **New → Blueprint** → conecta el repo → Render leerá el `render.yaml` de la raíz y te pedirá llenar estas variables:
 
 | Variable | Ejemplo |
 |---|---|
@@ -53,7 +55,7 @@ git push -u origin main
 | `APP_BASE_URL` | `https://REEMPLAZA-CON-TU-BACKEND.onrender.com` (lo llenas después de crear el servicio) |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:4200,https://TU-APP.vercel.app` (la URL final de Vercel) |
 
-**Opcion B — Manual:** New → **Web Service** → conecta el repo → **Root directory:** `requisiciones-backend` → **Runtime:** Docker (usa el `Dockerfile`) → define las mismas variables → **Health Check Path:** `/api/v1/catalogo/partidas`.
+**Opcion B — Manual:** New → **Web Service** → conecta el repo → **deja el Root Directory en la raíz del repo** (no lo cambies) → Runtime **Docker**: Render usa solo el `./Dockerfile` de la raíz → define las mismas variables → **Health Check Path:** `/api/v1/catalogo/partidas`.
 
 Luego:
 1. Copia la URL final (`https://xxxxxxxx.onrender.com`).

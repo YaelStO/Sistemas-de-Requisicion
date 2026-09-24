@@ -1,0 +1,13 @@
+.git
+.gitignore
+.idea
+.github
+modules
+shared
+uploads
+target
+node_modules
+requisiciones-frontend
+*.iml
+DEPLOY.md
+migrar_organigrama.sql

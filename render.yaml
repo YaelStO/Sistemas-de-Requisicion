@@ -1,14 +1,14 @@
 # Render Blueprint — Backend (Spring Boot)
-# 1) Sube el repo a GitHub y en Render elige "New > Blueprint" apuntando a este archivo.
+# Este archivo debe estar en la RAÍZ del repo.
+# 1) En Render elige "New > Blueprint" y conéctalo a tu repo (lo detecta solo).
 # 2) Render te pedirá completar las variables marcadas con "sync: false".
-# 3) Después de crear el servicio, copia la URL (https://xxx.onrender.com) en
-#    APP_BASE_URL y en CORS_ALLOWED_ORIGINS (junto a la URL de Vercel).
+# 3) Después de crear el servicio, copia su URL (https://xxx.onrender.com) en
+#    APP_BASE_URL y añádela (junto a la URL de Vercel) en CORS_ALLOWED_ORIGINS.
 
 services:
   - type: web
     name: requisiciones-backend
     runtime: docker
-    rootDir: requisiciones-backend
     dockerfilePath: ./Dockerfile
     plan: free
     healthCheckPath: /api/v1/catalogo/partidas
