@@ -53,6 +53,12 @@
             "styles": [
               "src/styles.scss"
             ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
             "outputMode": "static",
             "security": {
               "allowedHosts": [

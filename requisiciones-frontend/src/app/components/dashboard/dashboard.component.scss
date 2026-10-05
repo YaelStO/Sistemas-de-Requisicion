@@ -130,3 +130,14 @@ $crema-tabla: #fbf3d5;
   &.na { background-color: #95a5a6; }
   &.en-revision { background-color: #2980b9; }
 }
+
+/* correcciones de justificacion pedidas por Materiales */
+.correccion-panel {
+  border-left: 4px solid #f39c12 !important;
+  background-color: #fffdf5;
+}
+
+.correccion-texto {
+  max-width: 420px;
+  color: #7a4a00;
+}

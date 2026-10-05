@@ -122,3 +122,9 @@ tr.row-rechazado td { background-color: #fdecea; }
   background-color: #5b1225;
   border-color: #5b1225;
 }
+
+/* correccion de justificacion pedida por Materiales */
+.correccion-panel {
+  border-left: 4px solid $warning !important;
+  background-color: #fffdf5;
+}

@@ -18,6 +18,7 @@ interface NodoArea {
   area: Area;
   hijos: NodoArea[];
   requisiciones: Requisicion[];
+  totalPropio: number;
   total: number;
   expandido: boolean;
 }
@@ -56,7 +57,10 @@ export class BandejaSolicitudesComponent implements OnInit {
   nodoActual: NodoArea | null = null;
   nodosNivel: NodoArea[] = [];
   breadcrumb: NodoArea[] = [];
+  /** Cuando es falso la tabla muestra sólo las requisiciones del nodo elegido. */
+  incluirSubdivisiones = true;
   private padrePorId = new Map<number, NodoArea>();
+  private nodosPorId = new Map<number, NodoArea>();
 
   mostrarHistorial = false;
   historialEventos: HistoricoEvento[] = [];
@@ -420,18 +424,23 @@ export class BandejaSolicitudesComponent implements OnInit {
   }
 
   textoTotal(total: number): string {
+    if (total === 0) {
+      return 'Sin solicitudes';
+    }
     return total === 1 ? '1 requerimiento' : `${total} requerimientos`;
   }
 
   private armarArbol(): void {
     const visibles = this.requisicionesFiltradas;
     const porId = new Map<number, NodoArea>();
-    const areaPorNombre = new Map<string, NodoArea>();
+    const porNombre = new Map<string, NodoArea>();
     this.padrePorId.clear();
+    this.nodosPorId.clear();
+
     for (const a of this.areas) {
-      const nodo: NodoArea = { area: a, hijos: [], requisiciones: [], total: 0, expandido: false };
+      const nodo: NodoArea = { area: a, hijos: [], requisiciones: [], totalPropio: 0, total: 0, expandido: false };
       porId.set(a.id, nodo);
-      areaPorNombre.set(a.nombre, nodo);
+      porNombre.set(a.nombre, nodo);
     }
     const raices: NodoArea[] = [];
     for (const nodo of porId.values()) {
@@ -443,26 +452,30 @@ export class BandejaSolicitudesComponent implements OnInit {
         raices.push(nodo);
       }
     }
-    const sinArea = new Map<string, Requisicion[]>();
+
+    // Cada requisición se asigna a su área por id; si el área fue borrada o
+    // renombrada después de crearse, cae a un nodo sintético con id único.
+    let idSintetico = -1;
+    const sinArea = new Map<string, NodoArea>();
     for (const r of visibles) {
-      const nodo = areaPorNombre.get(r.area);
-      if (nodo) {
-        nodo.requisiciones.push(r);
-      } else {
-        const grupo = sinArea.get(r.area) ?? [];
-        grupo.push(r);
-        sinArea.set(r.area, grupo);
+      let nodo = (r.areaId != null ? porId.get(r.areaId) : undefined) ?? porNombre.get(r.area);
+      if (!nodo) {
+        nodo = sinArea.get(r.area);
+        if (!nodo) {
+          nodo = {
+            area: { id: idSintetico--, nombre: r.area || 'Sin área', nivel: 'DEPARTAMENTO', parentId: null, activo: true },
+            hijos: [],
+            requisiciones: [],
+            totalPropio: 0,
+            total: 0,
+            expandido: false
+          };
+          sinArea.set(r.area, nodo);
+          raices.push(nodo);
+        }
       }
+      nodo.requisiciones.push(r);
     }
-    sinArea.forEach((reqs, nombre) => {
-      raices.push({
-        area: { id: -1, nombre, nivel: 'DEPARTAMENTO', parentId: null, activo: true },
-        hijos: [],
-        requisiciones: reqs,
-        total: 0,
-        expandido: false
-      });
-    });
 
     const rankNivel = (nivel: string): number =>
       nivel === 'DIRECCION_GENERAL' ? 3 : nivel === 'DIRECCION' ? 2 : nivel === 'COORDINACION' ? 1 : 0;
@@ -471,36 +484,73 @@ export class BandejaSolicitudesComponent implements OnInit {
         const dif = rankNivel(b.area.nivel) - rankNivel(a.area.nivel);
         return dif !== 0 ? dif : a.area.nombre.localeCompare(b.area.nombre, 'es');
       });
-    const preparar = (nodo: NodoArea): number => {
-      nodo.hijos = ordenar(nodo.hijos);
-      let total = nodo.requisiciones.length;
-      const hijosVisibles: NodoArea[] = [];
-      for (const h of nodo.hijos) {
-        const sub = preparar(h);
-        if (sub > 0) {
-          hijosVisibles.push(h);
-        }
-        total += sub;
-      }
-      nodo.hijos = hijosVisibles;
-      nodo.total = total;
-      return total;
-    };
 
+    // El organigrama completo se conserva siempre: los nodos sin requisiciones
+    // no se podan, para que el breadcrumb y la navegación sobrevivan a los
+    // filtros de estado.
+    const acumular = (nodo: NodoArea): number => {
+      nodo.totalPropio = nodo.requisiciones.length;
+      nodo.total = nodo.totalPropio;
+      for (const h of nodo.hijos) {
+        nodo.total += acumular(h);
+      }
+      return nodo.total;
+    };
     ordenar(raices);
     for (const r of raices) {
-      preparar(r);
+      ordenar(r.hijos);
     }
-    const activos = raices.filter((r) => r.total > 0);
-    activos.forEach((r) => {
-      r.expandido = true;
-    });
-    this.nodosRaiz = activos;
+    for (const nodo of porId.values()) {
+      nodo.hijos = ordenar(nodo.hijos);
+    }
+    raices.forEach(acumular);
+    raices.forEach((r) => (r.expandido = true));
+
+    this.nodosRaiz = raices;
+    for (const nodo of porId.values()) {
+      this.nodosPorId.set(nodo.area.id, nodo);
+    }
+    for (const nodo of sinArea.values()) {
+      this.nodosPorId.set(nodo.area.id, nodo);
+    }
     this.reconstruirNivel();
   }
 
-  get requisicionesNodo(): Requisicion[] {
-    return this.nodoActual?.requisiciones ?? [];
+  /**
+   * Requisiciones del nodo elegido más las de todas sus áreas hijas: al entrar a
+   * una Dirección se ve lo que pidió esa Dirección completa, sin importar si
+   * pasó por sus Coordinaciones o Departamentos.
+   */
+  get requisicionesVisibles(): Requisicion[] {
+    if (!this.nodoActual) {
+      return this.requisicionesFiltradas;
+    }
+    if (!this.incluirSubdivisiones) {
+      return this.nodoActual.requisiciones;
+    }
+    const todas: Requisicion[] = [];
+    const recolectar = (nodo: NodoArea): void => {
+      todas.push(...nodo.requisiciones);
+      for (const h of nodo.hijos) {
+        recolectar(h);
+      }
+    };
+    recolectar(this.nodoActual);
+    return todas;
+  }
+
+  get haySubdivisiones(): boolean {
+    return (this.nodoActual?.total ?? 0) > (this.nodoActual?.totalPropio ?? 0);
+  }
+
+  get tituloTabla(): string {
+    if (!this.nodoActual) {
+      return 'Solicitudes de tu área';
+    }
+    if (this.incluirSubdivisiones) {
+      return `Solicitudes de ${this.nodoActual.area.nombre} y sus subdivisiones`;
+    }
+    return `Solicitudes de ${this.nodoActual.area.nombre}`;
   }
 
   irA(n: NodoArea): void {
@@ -513,13 +563,18 @@ export class BandejaSolicitudesComponent implements OnInit {
     this.router.navigate(['/bandeja-solicitudes']);
   }
 
+  /**
+   * Determina el nivel inicial según la cuenta: Dirección General entra por sus
+   * Direcciones, una Dirección por sus Coordinaciones y una Coordinación por sus
+   * Departamentos.
+   */
   private reconstruirNivel(): void {
     this.nodoActual = null;
     this.nodosNivel = [];
     this.breadcrumb = [];
 
     if (this.areaId != null) {
-      const nodo = this.buscarNodoPorId(this.nodosRaiz, this.areaId);
+      const nodo = this.nodosPorId.get(this.areaId) ?? null;
       if (!nodo) {
         this.router.navigate(['/bandeja-solicitudes'], { replaceUrl: true });
         return;
@@ -530,11 +585,19 @@ export class BandejaSolicitudesComponent implements OnInit {
       return;
     }
 
-    const nombreArea = this.authService.usuario?.area ?? null;
-    const miNodo = nombreArea ? this.buscarNodoPorNombre(this.nodosRaiz, nombreArea) : null;
+    if (this.esDepartamento) {
+      // El departamento no navega el organigrama: sólo ve lo que él generó.
+      this.nodoActual = null;
+      this.nodosNivel = [];
+      this.breadcrumb = [];
+      return;
+    }
+
+    const miAreaId = this.authService.usuario?.areaId ?? null;
+    const miNodo = (miAreaId != null ? this.nodosPorId.get(miAreaId) : null) ?? null;
     if (miNodo) {
       this.nodosNivel = miNodo.hijos;
-      this.breadcrumb = [miNodo];
+      this.breadcrumb = this.rutaHasta(miNodo);
       return;
     }
 
@@ -553,24 +616,6 @@ export class BandejaSolicitudesComponent implements OnInit {
       pasos++;
     }
     return ruta;
-  }
-
-  private buscarNodoPorId(nodos: NodoArea[], id: number): NodoArea | null {
-    for (const n of nodos) {
-      if (n.area.id === id) return n;
-      const sub = this.buscarNodoPorId(n.hijos, id);
-      if (sub) return sub;
-    }
-    return null;
-  }
-
-  private buscarNodoPorNombre(nodos: NodoArea[], nombre: string): NodoArea | null {
-    for (const n of nodos) {
-      if (n.area.nombre === nombre) return n;
-      const sub = this.buscarNodoPorNombre(n.hijos, nombre);
-      if (sub) return sub;
-    }
-    return null;
   }
 
   abrirHistorial(): void {

@@ -11,6 +11,7 @@ import { HistorialEventosComponent } from './components/historial-eventos/histor
 import { SolicitudesEnProcesoComponent } from './components/solicitudes-en-proceso/solicitudes-en-proceso.component';
 import { CentroNotificacionesComponent } from './components/centro-notificaciones/centro-notificaciones.component';
 import { MaterialesComponent } from './components/materiales/materiales.component';
+import { DocumentacionComponent } from './components/documentacion/documentacion.component';
 import { authGuard, rolGuard } from './services/auth.guard';
 
 const ROLES_RECEPTORES = ['ROLE_COORDINACION', 'ROLE_DIRECCION', 'ROLE_DIRECCION_GENERAL', 'ROLE_MATERIALES'];
@@ -33,5 +34,6 @@ export const routes: Routes = [
   { path: 'gestion-areas', component: GestionAreasComponent, canActivate: [rolGuard(['ROLE_DIRECCION_GENERAL'])] },
   { path: 'materiales', component: MaterialesComponent, data: { vista: 'aprobadas' }, canActivate: [authGuard, rolGuard(['ROLE_MATERIALES'])] },
   { path: 'materiales/proceso', component: MaterialesComponent, data: { vista: 'proceso' }, canActivate: [authGuard, rolGuard(['ROLE_MATERIALES'])] },
+  { path: 'documentacion', component: DocumentacionComponent, canActivate: [authGuard, rolGuard(['ROLE_MATERIALES'])] },
   { path: '**', redirectTo: 'dashboard' }
 ];

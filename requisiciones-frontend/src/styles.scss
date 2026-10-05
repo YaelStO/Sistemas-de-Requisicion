@@ -157,6 +157,17 @@ body {
     background-color: $guinda;
     color: #fff;
   }
+
+  /* Variante compacta para usar junto a .btn-sm de Bootstrap */
+  &.btn-sm {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .btn-danger {
@@ -353,4 +364,40 @@ input[appCurrencyInput] {
 
 .invalid-feedback.d-block {
   font-size: 0.72rem;
+}
+
+/* ===== IMPRESIÓN DE LA HOJA DE DOCUMENTACIÓN (tamaño carta) =====
+   Vive aquí, y no en el componente, para poder ocultar el sidebar
+   (elemento de otro componente) y quitar el fondo del body. */
+@page {
+  size: letter portrait;
+  margin: 0;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  app-sidebar,
+  .no-print,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .dashboard-layout {
+    display: block;
+    min-height: 0;
+    background: #fff;
+  }
+
+  .content-area {
+    max-width: none;
+    padding: 0;
+  }
+
+  .hoja-scroll {
+    overflow: visible;
+    padding: 0;
+  }
 }

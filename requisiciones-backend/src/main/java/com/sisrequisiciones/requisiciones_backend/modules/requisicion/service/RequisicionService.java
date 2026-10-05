@@ -266,7 +266,8 @@ public class RequisicionService {
 
         List<String> acciones = List.of("Aprobó requerimiento", "Rechazó requerimiento", "Modificó registro",
                 "Autorizó la compra", "Reasignó partida", "Reasignó mes de compra",
-                "Registró la compra", "Entregó el material");
+                "Registró la compra", "Entregó el material",
+                "Solicitó corrección", "Corrigió justificación", "Resolvió corrección");
 
         return historicoRepository.findByRequisicionIdInAndAccionInOrderByFechaHoraDesc(
                         new ArrayList<>(relevantes.keySet()), acciones)
@@ -456,6 +457,69 @@ public class RequisicionService {
         return toResponse(requisicionRepository.save(r));
     }
 
+    // ===================== CORRECCIÓN DE JUSTIFICACIÓN =====================
+
+    /**
+     * Materiales pide corregir la justificación de una requisición ya autorizada.
+     * No bloquea la compra ni el documento: sólo deja el pedido visible para el
+     * área solicitante y queda registrado en la bitácora.
+     */
+    @Transactional
+    public RequisicionResponse pedirCorreccion(Long id, String comentario, Usuario usuario) {
+        verificarMateriales(usuario);
+        Requisicion r = obtenerAprobada(id);
+        if (comentario == null || comentario.isBlank()) {
+            throw new IllegalArgumentException("Describe qué corrección necesitas en la justificación");
+        }
+        if (comentario.length() > 1000) {
+            throw new IllegalArgumentException("La corrección no puede exceder 1000 caracteres");
+        }
+        if (r.isCorreccionPendiente()) {
+            throw new IllegalArgumentException("Ya hay una corrección pendiente en esta requisición");
+        }
+        String texto = comentario.trim();
+        r.setCorreccionPendiente(true);
+        r.setCorreccionComentario(texto);
+        r.setCorreccionSolicitadaPor(usuario.getNombreCompleto());
+        r.setCorreccionSolicitadaRol(usuario.getRol().name());
+        r.setCorreccionSolicitadaFecha(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        registrarEvento(r, usuario, "Solicitó corrección", "Justificación",
+                valor(r.getJustificacion()), texto);
+        return toResponse(requisicionRepository.save(r));
+    }
+
+    /**
+     * El área que creó la requisición corrige su justificación y cierra el pedido
+     * de Materiales. Sólo se permite cuando hay una corrección pendiente.
+     */
+    @Transactional
+    public RequisicionResponse corregirJustificacion(Long id, String justificacion, Usuario usuario) {
+        Requisicion r = requisicionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Requisición no encontrada"));
+        if (r.getCreadoPorId() == null || !r.getCreadoPorId().equals(usuario.getId())) {
+            throw new IllegalArgumentException("Sólo el área que generó la requisición puede corregir su justificación");
+        }
+        if (!r.isCorreccionPendiente()) {
+            throw new IllegalArgumentException("No hay ninguna corrección pendiente en esta requisición");
+        }
+        if (justificacion == null || justificacion.isBlank()) {
+            throw new IllegalArgumentException("La justificación corregida no puede quedar vacía");
+        }
+        if (justificacion.length() > 1000) {
+            throw new IllegalArgumentException("La justificación no puede exceder 1000 caracteres");
+        }
+        String nueva = justificacion.trim();
+        registrarEvento(r, usuario, "Corrigió justificación", "Justificación",
+                valor(r.getJustificacion()), nueva);
+        registrarEvento(r, usuario, "Resolvió corrección", "Corrección",
+                "Pendiente: " + valor(r.getCorreccionComentario()), "Atendida");
+        r.setJustificacion(nueva);
+        r.setCorreccionPendiente(false);
+        r.setCorreccionComentario(null);
+        r.setModificadoPor(usuario.getNombreCompleto());
+        return toResponse(requisicionRepository.save(r));
+    }
+
     private void verificarMateriales(Usuario usuario) {
         if (usuario.getRol() != Rol.ROLE_MATERIALES) {
             throw new IllegalArgumentException("Solo el área de Materiales puede administrar la compra");
@@ -504,7 +568,15 @@ public class RequisicionService {
     private RequisicionResponse toResponse(Requisicion r) {
         List<SugerenciaResponse> sugs = sugerenciaRepository.findByRequisicionId(r.getId())
                 .stream().map(SugerenciaResponse::from).toList();
-        return RequisicionResponse.from(r, sugs);
+        return RequisicionResponse.from(r, sugs,
+                nombreArea(r.getCoordAreaId()),
+                nombreArea(r.getDirAreaId()),
+                nombreArea(r.getDirGralAreaId()));
+    }
+
+    private String nombreArea(Long areaId) {
+        return areaId == null ? null
+                : areaRepository.findById(areaId).map(Area::getNombre).orElse(null);
     }
 
     private void guardarSugerencias(Requisicion r, List<RequisicionRequest.SugerenciaRequest> reqs) {

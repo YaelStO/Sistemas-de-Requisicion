@@ -40,6 +40,10 @@
         <i class="bi bi-truck icon"></i>
         <span class="nav-texto">En Proceso de Compra</span>
       </a>
+      <a class="nav-item" routerLink="/documentacion" [class.active]="activo === 'documentacion'" title="Documentación de Materiales">
+        <i class="bi bi-file-earmark-text icon"></i>
+        <span class="nav-texto">Documentación</span>
+      </a>
     }
     <a class="nav-item" routerLink="/solicitudes-en-proceso" [class.active]="activo === 'proceso'" title="Mis Solicitudes en Proceso">
       <i class="bi bi-arrow-repeat icon"></i>

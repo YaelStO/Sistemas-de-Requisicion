@@ -165,6 +165,16 @@
 
   .total-badge { font-weight: 600; }
 
+  /* El organigrama se mantiene completo aunque un nivel no tenga solicitudes,
+     para que el breadcrumb y la navegación no se rompan al filtrar. */
+  &.sin-solicitudes {
+    background-color: #fbfbfb;
+    border-color: #ececec !important;
+    opacity: 0.75;
+
+    .area-icono, .area-nombre { color: #8a8a8a; }
+  }
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(91, 18, 37, 0.12);

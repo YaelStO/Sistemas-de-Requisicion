@@ -41,6 +41,11 @@ export class AutorizacionDetalleComponent implements OnInit {
   pagHistorial = 1;
   porPaginaHistorial = 10;
 
+  /** Corrección de justificación pedida por Materiales. */
+  editandoCorreccion = false;
+  justificacionCorregida = '';
+  guardandoCorreccion = false;
+
   private requisicionService = inject(RequisicionService);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
@@ -77,10 +82,64 @@ export class AutorizacionDetalleComponent implements OnInit {
 
   volver(): void {
     if (this.authService.rol === 'ROLE_DEPARTAMENTO') {
-      this.router.navigate(['/solicitudes-en-proceso']);
+      this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/bandeja-solicitudes']);
     }
+  }
+
+  /** Sólo el área que generó la requisición puede atender el pedido. */
+  get puedeCorregirJustificacion(): boolean {
+    const r = this.requisicion;
+    const mio = this.authService.usuario?.id;
+    if (!r || !r.correccionPendiente) {
+      return false;
+    }
+    return mio != null && r.creadoPorId === mio;
+  }
+
+  abrirCorreccion(): void {
+    this.editandoCorreccion = true;
+    this.justificacionCorregida = this.requisicion?.justificacion ?? '';
+    this.error = '';
+    this.cdr.markForCheck();
+  }
+
+  cancelarCorreccion(): void {
+    this.editandoCorreccion = false;
+  }
+
+  guardarCorreccion(): void {
+    const r = this.requisicion;
+    if (!r) return;
+    const texto = this.justificacionCorregida.trim();
+    if (!texto) {
+      this.error = 'La justificación corregida no puede quedar vacía.';
+      this.cdr.markForCheck();
+      return;
+    }
+    if (texto === (r.justificacion ?? '').trim()) {
+      this.error = 'Edita la justificación para poder enviarla.';
+      this.cdr.markForCheck();
+      return;
+    }
+    this.guardandoCorreccion = true;
+    this.error = '';
+    this.cdr.markForCheck();
+    this.requisicionService.corregirJustificacion(r.id, texto).subscribe({
+      next: (actualizada) => {
+        this.guardandoCorreccion = false;
+        this.editandoCorreccion = false;
+        this.requisicion = actualizada;
+        this.mensaje = `Requisición ${actualizada.folio}: justificación corregida. Materiales ya no tiene una corrección pendiente.`;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.guardandoCorreccion = false;
+        this.error = typeof err.error === 'string' ? err.error : 'No se pudo enviar la corrección.';
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   get esMiTurno(): boolean {

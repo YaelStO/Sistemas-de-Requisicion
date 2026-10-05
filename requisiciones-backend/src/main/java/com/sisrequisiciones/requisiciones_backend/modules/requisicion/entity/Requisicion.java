@@ -101,6 +101,25 @@ public class Requisicion {
     @Column(name = "marca_seleccionada", length = 200)
     private String marcaSeleccionada;
 
+    /**
+     * Corrección de la justificación pedida por Materiales. No bloquea la
+     * compra: la requisición sigue autorizada y el documento se puede emitir.
+     */
+    @Column(name = "correccion_pendiente", nullable = false, columnDefinition = "boolean default false")
+    private boolean correccionPendiente;
+
+    @Column(name = "correccion_comentario", length = 1000)
+    private String correccionComentario;
+
+    @Column(name = "correccion_solicitada_por")
+    private String correccionSolicitadaPor;
+
+    @Column(name = "correccion_solicitada_fecha")
+    private String correccionSolicitadaFecha;
+
+    @Column(name = "correccion_solicitada_rol", length = 40)
+    private String correccionSolicitadaRol;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -193,4 +212,19 @@ public class Requisicion {
 
     public String getMarcaSeleccionada() { return marcaSeleccionada; }
     public void setMarcaSeleccionada(String marcaSeleccionada) { this.marcaSeleccionada = marcaSeleccionada; }
+
+    public boolean isCorreccionPendiente() { return correccionPendiente; }
+    public void setCorreccionPendiente(boolean correccionPendiente) { this.correccionPendiente = correccionPendiente; }
+
+    public String getCorreccionComentario() { return correccionComentario; }
+    public void setCorreccionComentario(String correccionComentario) { this.correccionComentario = correccionComentario; }
+
+    public String getCorreccionSolicitadaPor() { return correccionSolicitadaPor; }
+    public void setCorreccionSolicitadaPor(String correccionSolicitadaPor) { this.correccionSolicitadaPor = correccionSolicitadaPor; }
+
+    public String getCorreccionSolicitadaFecha() { return correccionSolicitadaFecha; }
+    public void setCorreccionSolicitadaFecha(String correccionSolicitadaFecha) { this.correccionSolicitadaFecha = correccionSolicitadaFecha; }
+
+    public String getCorreccionSolicitadaRol() { return correccionSolicitadaRol; }
+    public void setCorreccionSolicitadaRol(String correccionSolicitadaRol) { this.correccionSolicitadaRol = correccionSolicitadaRol; }
 }

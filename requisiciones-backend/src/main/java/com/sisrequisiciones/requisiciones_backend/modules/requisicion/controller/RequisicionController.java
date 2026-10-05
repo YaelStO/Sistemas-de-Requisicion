@@ -171,7 +171,27 @@ public class RequisicionController {
         }
     }
 
+    @PostMapping("/{id}/pedir-correccion")
+    public ResponseEntity<?> pedirCorreccion(@PathVariable Long id, @RequestBody CorreccionRequest request, Authentication auth) {
+        try {
+            return ResponseEntity.ok(requisicionService.pedirCorreccion(id, request.comentario(), usuario(auth)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/corregir-justificacion")
+    public ResponseEntity<?> corregirJustificacion(@PathVariable Long id, @RequestBody CorreccionJustificacionRequest request, Authentication auth) {
+        try {
+            return ResponseEntity.ok(requisicionService.corregirJustificacion(id, request.justificacion(), usuario(auth)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     public record CompraRequest(String proveedor, Long sugerenciaId, Double costoPropio) {}
     public record PartidaRequest(String partidaCodigo, String partidaNombre) {}
     public record MesCompraRequest(String mesCompra, String justificacion) {}
+    public record CorreccionRequest(String comentario) {}
+    public record CorreccionJustificacionRequest(String justificacion) {}
 }

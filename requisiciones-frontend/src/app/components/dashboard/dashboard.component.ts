@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { RequisicionService, Dashboard, Requisicion } from '../../services/requisicion.service';
+import { AuthService } from '../../services/auth.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
@@ -22,11 +23,20 @@ export class DashboardComponent implements OnInit {
   private requisicionService = inject(RequisicionService);
   private cdr = inject(ChangeDetectorRef);
   protected router = inject(Router);
+  private authService = inject(AuthService);
 
   get total() { return this.dashboard?.total ?? 0; }
   get enRevision() { return this.dashboard?.enRevision ?? 0; }
   get aprobadas() { return this.dashboard?.aprobadas ?? 0; }
   get rechazadas() { return this.dashboard?.rechazadas ?? 0; }
+
+  /** Correcciones de justificación que Materiales tiene pendientes de atender. */
+  get correccionesPendientes(): Requisicion[] {
+    const mio = this.authService.usuario?.id ?? null;
+    return this.requisiciones.filter(
+      (r) => r.correccionPendiente && (mio == null || r.creadoPorId === mio)
+    );
+  }
 
   ngOnInit(): void {
     this.requisicionService

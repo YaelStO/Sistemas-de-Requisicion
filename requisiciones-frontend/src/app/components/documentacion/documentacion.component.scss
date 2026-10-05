@@ -1,0 +1,237 @@
+$guinda: #5b1225;
+$crema-tabla: #fbf3d5;
+
+/* Tamaño carta: 8.5in x 11in, márgenes de 2cm como en el PDF/DOCX. */
+$doc-ancho: 8.5in;
+$doc-alto: 11in;
+$doc-padding: 0.79in;
+
+/* ===== LISTA DE DIRECCIONES ===== */
+.list-group-item {
+  font-size: 0.82rem;
+
+  &.active {
+    background-color: $guinda;
+    border-color: $guinda;
+
+    .dir-nombre, .dir-total, .dir-meta { color: #fff; }
+    .dir-meta { opacity: 0.8; }
+  }
+}
+
+.dir-nombre {
+  font-weight: 600;
+  color: $guinda;
+}
+
+.dir-meta {
+  font-weight: 400;
+  font-size: 0.7rem;
+}
+
+.dir-total {
+  font-weight: 700;
+  color: $guinda;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.just-texto {
+  max-width: 320px;
+  font-size: 0.74rem;
+  color: #666;
+}
+
+.folio {
+  font-weight: 700;
+  color: $guinda;
+}
+
+/* ===== PREVISUALIZACIÓN TAMAÑO CARTA ===== */
+.hoja-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.doc-hoja {
+  width: $doc-ancho;
+  min-height: $doc-alto;
+  padding: $doc-padding;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.14);
+  color: #222;
+  font-size: 9.5pt;
+  line-height: 1.35;
+}
+
+.doc-marca {
+  border-bottom: 2px solid $guinda;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+
+  .doc-marca-titulo {
+    display: block;
+    font-weight: 700;
+    font-size: 13pt;
+    color: $guinda;
+    letter-spacing: 0.02em;
+  }
+
+  .doc-marca-sub {
+    display: block;
+    font-size: 8pt;
+    color: #777;
+  }
+}
+
+.doc-encabezado {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.doc-label {
+  margin: 0;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+
+.doc-valor {
+  margin: 0;
+  font-weight: 700;
+  font-size: 11pt;
+  color: $guinda;
+}
+
+.doc-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  th {
+    background-color: $crema-tabla;
+    color: $guinda;
+    font-size: 7.5pt;
+    font-weight: 700;
+    padding: 0.35rem 0.4rem;
+    border: 0.5pt solid #cbbd90;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  td {
+    padding: 0.35rem 0.4rem;
+    border: 0.5pt solid #d8d8d8;
+    vertical-align: top;
+    font-size: 9pt;
+  }
+
+  .col-desc { width: 44%; }
+  .col-unidad { width: 12%; }
+  .col-cant { width: 12%; }
+  .col-precio { width: 16%; }
+  .col-sub { width: 16%; }
+}
+
+.doc-item {
+  display: block;
+  font-weight: 600;
+}
+
+.doc-item-ref {
+  display: block;
+  font-size: 7pt;
+  font-style: italic;
+  color: #777;
+  margin-top: 0.15rem;
+}
+
+.doc-totales {
+  margin: 0.9rem 0 0 auto;
+  width: 62%;
+}
+
+.doc-total-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.28rem 0.2rem;
+  font-size: 9.5pt;
+  color: #444;
+  border-bottom: 0.5pt solid #e4e4e4;
+
+  &.doc-total-final {
+    font-weight: 700;
+    font-size: 11pt;
+    color: $guinda;
+    border-bottom: none;
+    border-top: 1pt solid $guinda;
+  }
+}
+
+.doc-seccion {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: $guinda;
+  border-bottom: 1pt solid $guinda;
+  padding-bottom: 0.25rem;
+  margin: 1.4rem 0 0.8rem;
+}
+
+.doc-bloque {
+  margin-bottom: 0.9rem;
+  page-break-inside: avoid;
+}
+
+.doc-bloque-titulo {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: $guinda;
+  margin: 0 0 0.2rem;
+}
+
+.doc-bloque-campo {
+  margin: 0.1rem 0;
+  font-size: 9pt;
+  text-align: justify;
+}
+
+.doc-bloque-correccion {
+  margin: 0.35rem 0 0;
+  padding: 0.35rem 0.5rem;
+  background-color: #fff6db;
+  border-left: 2.5pt solid #f39c12;
+  font-size: 8.5pt;
+  color: #7a4a00;
+}
+
+.doc-firmas {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 2.4rem;
+  page-break-inside: avoid;
+}
+
+.doc-firma {
+  flex: 1;
+  text-align: center;
+  border-top: 0.75pt solid #333;
+  padding-top: 0.3rem;
+}
+
+.doc-firma-nombre {
+  display: block;
+  font-size: 9pt;
+  font-weight: 600;
+  min-height: 1.1rem;
+}
+
+.doc-firma-rol {
+  display: block;
+  font-size: 7.5pt;
+  color: #666;
+}

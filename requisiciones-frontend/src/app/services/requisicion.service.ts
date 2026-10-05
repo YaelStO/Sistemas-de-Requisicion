@@ -52,6 +52,19 @@ export interface Requisicion {
   tipoCosto?: string;
   precioCompra?: number;
   marcaSeleccionada?: string;
+  /** Cadena jerárquica resuelta al crear la requisición (ids del organigrama). */
+  areaId?: number | null;
+  coordAreaId?: number | null;
+  dirAreaId?: number | null;
+  dirGralAreaId?: number | null;
+  coordArea?: string | null;
+  dirArea?: string | null;
+  dirGralArea?: string | null;
+  /** Corrección de la justificación pedida por Materiales (no bloquea la compra). */
+  correccionPendiente?: boolean;
+  correccionComentario?: string | null;
+  correccionSolicitadaPor?: string | null;
+  correccionSolicitadaFecha?: string | null;
 }
 
 export interface HistoricoEvento {
@@ -135,6 +148,14 @@ export class RequisicionService {
 
   reasignarMes(id: number, mesCompra: string, justificacion: string): Observable<Requisicion> {
     return this.http.patch<Requisicion>(`${this.apiUrl}/${id}/mes-compra`, { mesCompra, justificacion }).pipe(timeout(TIEMPO_ESPERA_MS));
+  }
+
+  pedirCorreccion(id: number, comentario: string): Observable<Requisicion> {
+    return this.http.post<Requisicion>(`${this.apiUrl}/${id}/pedir-correccion`, { comentario }).pipe(timeout(TIEMPO_ESPERA_MS));
+  }
+
+  corregirJustificacion(id: number, justificacion: string): Observable<Requisicion> {
+    return this.http.post<Requisicion>(`${this.apiUrl}/${id}/corregir-justificacion`, { justificacion }).pipe(timeout(TIEMPO_ESPERA_MS));
   }
 
   enProceso(): Observable<Requisicion[]> {

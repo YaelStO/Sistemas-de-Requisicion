@@ -37,9 +37,35 @@ public record RequisicionResponse(
         String estadoCompra,
         String tipoCosto,
         Double precioCompra,
-        String marcaSeleccionada
+        String marcaSeleccionada,
+        Long areaId,
+        Long coordAreaId,
+        Long dirAreaId,
+        Long dirGralAreaId,
+        String coordArea,
+        String dirArea,
+        String dirGralArea,
+        boolean correccionPendiente,
+        String correccionComentario,
+        String correccionSolicitadaPor,
+        String correccionSolicitadaFecha
 ) {
     public static RequisicionResponse from(Requisicion r, List<SugerenciaResponse> sugerencias) {
+        return from(r, sugerencias, null, null, null);
+    }
+
+    /**
+     * Además de la cadena de ids (resueltos al crear la requisición) expone los
+     * nombres de los niveles superiores, para que el portal pueda agrupar por
+     * Dirección sin depender del organigrama en el cliente.
+     */
+    public static RequisicionResponse from(
+            Requisicion r,
+            List<SugerenciaResponse> sugerencias,
+            String coordArea,
+            String dirArea,
+            String dirGralArea
+    ) {
         return new RequisicionResponse(
                 r.getId(),
                 r.getFolio(),
@@ -69,7 +95,18 @@ public record RequisicionResponse(
                 r.getEstadoCompra() != null ? r.getEstadoCompra().name() : null,
                 r.getTipoCosto(),
                 r.getPrecioCompra(),
-                r.getMarcaSeleccionada()
+                r.getMarcaSeleccionada(),
+                r.getAreaId(),
+                r.getCoordAreaId(),
+                r.getDirAreaId(),
+                r.getDirGralAreaId(),
+                coordArea,
+                dirArea,
+                dirGralArea,
+                r.isCorreccionPendiente(),
+                r.getCorreccionComentario(),
+                r.getCorreccionSolicitadaPor(),
+                r.getCorreccionSolicitadaFecha()
         );
     }
 
