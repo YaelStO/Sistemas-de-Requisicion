@@ -1,6 +1,21 @@
 $guinda: #5b1225;
 $guinda-light: #731830;
 
+/* ===== SHELL (permite que el botón y el overlay vivan fuera del aside) ===== */
+.sidebar-shell {
+  display: contents;
+}
+
+/* ===== BOTÓN DE MENÚ (solo móvil) ===== */
+.btn-menu-movil {
+  display: none;
+}
+
+/* ===== OVERLAY (solo móvil) ===== */
+.sidebar-overlay {
+  display: none;
+}
+
 .sidebar {
   width: 280px;
   background-color: $guinda;
@@ -232,4 +247,117 @@ $guinda-light: #731830;
       }
     }
   }
+}
+
+/* ===== RESPONSIVE: CELULAR / TABLET ===== */
+@media (max-width: 991.98px) {
+  .btn-menu-movil {
+    display: flex;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background-color: $guinda;
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    z-index: 1040;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s ease;
+
+    &:hover { background-color: $guinda-light; }
+    &:focus-visible { outline: 2px solid #f1c40f; outline-offset: 2px; }
+
+    &.oculto { display: none; }
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 8, 12, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 1070;
+    animation: sidebar-overlay-in 0.2s ease;
+  }
+
+  .sidebar,
+  .sidebar.colapsada {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    height: 100dvh;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s linear 0.25s;
+    z-index: 1080;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
+
+    &.abierta {
+      transform: translateX(0);
+      visibility: visible;
+      transition: transform 0.25s ease, visibility 0s;
+    }
+
+    /* En móvil el colapso no aplica: el menú se muestra completo */
+    .sidebar-header {
+      padding: 1.25rem 1rem;
+      justify-content: flex-start;
+
+      .brand-icono { display: flex; }
+      .brand-texto { display: block; }
+    }
+
+    .sidebar-menu .nav-item {
+      justify-content: flex-start;
+      padding: 0.72rem 1rem;
+      gap: 0.75rem;
+
+      .nav-texto { display: block; }
+
+      &.active {
+        margin-left: 0.5rem;
+        border-radius: 8px 0 0 8px;
+      }
+
+      .badge {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.7rem;
+        border: none;
+        margin-left: auto;
+      }
+    }
+
+    .sidebar-footer {
+      padding: 1rem;
+
+      .user-box {
+        justify-content: flex-start;
+        .user-texto { display: block; }
+      }
+
+      .btn-logout .nav-texto { display: block; }
+    }
+  }
+
+  /* El botón de contraer no aplica en móvil (siempre visible con textos) */
+  .sidebar .sidebar-header .btn-toggle,
+  .sidebar.colapsada .sidebar-header .btn-toggle {
+    display: none;
+  }
+}
+
+@keyframes sidebar-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

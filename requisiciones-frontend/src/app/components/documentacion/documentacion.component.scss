@@ -1,5 +1,28 @@
 $guinda: #5b1225;
-$crema-tabla: #fbf3d5;
+
+/* ===== MODAL DE CORRECCIÓN (sobrepuesto, no en línea) ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 12, 18, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.modal-content {
+  width: 520px;
+  max-width: 96vw;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  background-color: #fffaf0;
+  border: none;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
 
 /* Tamaño carta: 8.5in x 11in, márgenes de 2cm como en el PDF/DOCX. */
 $doc-ancho: 8.5in;
@@ -60,13 +83,12 @@ $doc-padding: 0.79in;
   margin: 0 auto;
   background: #fff;
   box-shadow: 0 4px 22px rgba(0, 0, 0, 0.14);
-  color: #222;
+  color: #000;
   font-size: 9.5pt;
   line-height: 1.35;
 }
 
 .doc-marca {
-  border-bottom: 2px solid $guinda;
   padding-bottom: 0.4rem;
   margin-bottom: 1rem;
 
@@ -74,7 +96,7 @@ $doc-padding: 0.79in;
     display: block;
     font-weight: 700;
     font-size: 13pt;
-    color: $guinda;
+    color: #000;
     letter-spacing: 0.02em;
   }
 
@@ -88,8 +110,13 @@ $doc-padding: 0.79in;
 .doc-encabezado {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
   margin-bottom: 1.1rem;
+}
+
+.doc-enc-area {
+  text-align: right;
 }
 
 .doc-label {
@@ -104,7 +131,7 @@ $doc-padding: 0.79in;
   margin: 0;
   font-weight: 700;
   font-size: 11pt;
-  color: $guinda;
+  color: #000;
 }
 
 .doc-tabla {
@@ -113,28 +140,31 @@ $doc-padding: 0.79in;
   table-layout: fixed;
 
   th {
-    background-color: $crema-tabla;
-    color: $guinda;
+    background: transparent;
+    color: #000;
     font-size: 7.5pt;
     font-weight: 700;
     padding: 0.35rem 0.4rem;
-    border: 0.5pt solid #cbbd90;
+    border: 0.5pt solid #000;
+    text-align: left;
     text-transform: uppercase;
     letter-spacing: 0.02em;
   }
 
   td {
     padding: 0.35rem 0.4rem;
-    border: 0.5pt solid #d8d8d8;
+    border: 0.5pt solid #999;
     vertical-align: top;
     font-size: 9pt;
+    color: #000;
   }
 
-  .col-desc { width: 44%; }
-  .col-unidad { width: 12%; }
-  .col-cant { width: 12%; }
-  .col-precio { width: 16%; }
-  .col-sub { width: 16%; }
+  .col-num { width: 5%; text-align: center; }
+  .col-desc { width: 37%; }
+  .col-unidad { width: 13%; }
+  .col-cant { width: 11%; }
+  .col-precio { width: 15%; }
+  .col-sub { width: 19%; }
 }
 
 .doc-item {
@@ -152,7 +182,7 @@ $doc-padding: 0.79in;
 
 .doc-totales {
   margin: 0.9rem 0 0 auto;
-  width: 62%;
+  width: 55%;
 }
 
 .doc-total-fila {
@@ -160,52 +190,36 @@ $doc-padding: 0.79in;
   justify-content: space-between;
   padding: 0.28rem 0.2rem;
   font-size: 9.5pt;
-  color: #444;
+  color: #333;
   border-bottom: 0.5pt solid #e4e4e4;
 
   &.doc-total-final {
     font-weight: 700;
     font-size: 11pt;
-    color: $guinda;
+    color: #000;
     border-bottom: none;
-    border-top: 1pt solid $guinda;
+    border-top: 1pt solid #000;
   }
 }
 
 .doc-seccion {
   font-size: 10.5pt;
   font-weight: 700;
-  color: $guinda;
-  border-bottom: 1pt solid $guinda;
+  color: #000;
+  border-bottom: 0.75pt solid #000;
   padding-bottom: 0.25rem;
   margin: 1.4rem 0 0.8rem;
 }
 
-.doc-bloque {
-  margin-bottom: 0.9rem;
+.doc-just-texto {
+  margin: 0 0 0.5rem;
+  font-size: 9.5pt;
+  text-align: justify;
   page-break-inside: avoid;
 }
 
-.doc-bloque-titulo {
-  font-size: 8.5pt;
-  font-weight: 700;
-  color: $guinda;
-  margin: 0 0 0.2rem;
-}
-
-.doc-bloque-campo {
-  margin: 0.1rem 0;
-  font-size: 9pt;
-  text-align: justify;
-}
-
-.doc-bloque-correccion {
-  margin: 0.35rem 0 0;
-  padding: 0.35rem 0.5rem;
-  background-color: #fff6db;
-  border-left: 2.5pt solid #f39c12;
-  font-size: 8.5pt;
-  color: #7a4a00;
+.doc-correccion {
+  color: #777;
 }
 
 .doc-firmas {
@@ -234,4 +248,15 @@ $doc-padding: 0.79in;
   display: block;
   font-size: 7.5pt;
   color: #666;
+}
+
+/* Al imprimir sólo sale la hoja: se aplana la fila/columna del layout. */
+@media print {
+  .row { display: block; }
+  .col-lg-8 { width: 100%; max-width: 100%; }
+
+  .doc-hoja {
+    margin: 0;
+    box-shadow: none;
+  }
 }

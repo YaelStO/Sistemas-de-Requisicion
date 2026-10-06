@@ -27,6 +27,8 @@ export class NuevaRequisicionComponent implements OnInit {
   partidasList: Partida[] = [];
   unidadesMedidaList: UnidadMedida[] = [];
   partidaSeleccionada: Partida | null = null;
+  descripcionPartidaAbierta = false;
+  avisoPartida = '';
   fechaSolicitud = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
   archivosPdf: File[] = [];
   mensaje = '';
@@ -101,14 +103,19 @@ export class NuevaRequisicionComponent implements OnInit {
     const selectElement = event.target as HTMLSelectElement;
     const id = Number(selectElement.value);
     this.partidaSeleccionada = this.partidasList.find(p => p.id === id) || null;
+    this.avisoPartida = '';
   }
 
-  verDescripcion(): void {
+  alternarDescripcion(): void {
     if (!this.partidaSeleccionada) {
-      alert('Selecciona primero una partida específica.');
+      this.avisoPartida = 'Selecciona primero una partida específica.';
+      this.descripcionPartidaAbierta = false;
+      this.cdr.markForCheck();
       return;
     }
-    alert(this.partidaSeleccionada.nombre + '\n\n' + this.partidaSeleccionada.descripcion);
+    this.avisoPartida = '';
+    this.descripcionPartidaAbierta = !this.descripcionPartidaAbierta;
+    this.cdr.markForCheck();
   }
 
   get sugerencias(): FormArray {
@@ -257,6 +264,9 @@ export class NuevaRequisicionComponent implements OnInit {
         this.requisicionForm.reset({ cantidad: 1, precioEstimadoUnitario: 0 });
         (this.requisicionForm.get('sugerencias') as FormArray).clear();
         this.archivosPdf = [];
+        this.partidaSeleccionada = null;
+        this.descripcionPartidaAbierta = false;
+        this.avisoPartida = '';
         this.cdr.markForCheck();
       },
       error: (err) => {

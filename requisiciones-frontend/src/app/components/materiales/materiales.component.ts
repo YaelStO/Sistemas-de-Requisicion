@@ -481,10 +481,10 @@ export class MaterialesComponent implements OnInit {
 
   estadoClaseMateriales(estado: string): string {
     switch (estado) {
-      case 'APROBADO': return 'process';
-      case 'RECHAZADO': return 'rejected';
-      case 'PENDIENTE': return 'pending';
-      default: return 'na';
+      case 'APROBADO': return 'status-process';
+      case 'RECHAZADO': return 'status-rejected';
+      case 'PENDIENTE': return 'status-pending';
+      default: return 'status-na';
     }
   }
 
@@ -499,10 +499,10 @@ export class MaterialesComponent implements OnInit {
 
   compraClase(estado: string | undefined): string {
     switch (estado) {
-      case 'EN_COMPRA': return 'process';
-      case 'COMPRADO': return 'pending';
-      case 'ENTREGADO': return 'completed';
-      default: return 'na';
+      case 'EN_COMPRA': return 'status-process';
+      case 'COMPRADO': return 'status-pending';
+      case 'ENTREGADO': return 'status-completed';
+      default: return 'status-na';
     }
   }
 

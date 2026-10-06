@@ -8,10 +8,9 @@ import { AuthService } from '../../services/auth.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import type * as Docx from 'docx';
 
-/** Tasa de IVA aplicada al documento de documentación. */
+
 const TASA_IVA = 0.16;
 
-/** Tamaño carta en pulgadas: 8.5 x 11. */
 const CARTA_ANCHO_IN = 8.5;
 const CARTA_ALTO_IN = 11;
 
@@ -386,9 +385,7 @@ export class DocumentacionComponent implements OnInit {
     const util = ancho - m.left - m.right;
 
     let y = m.top;
-    const guinda: [number, number, number] = [91, 18, 37];
     const gris: [number, number, number] = [90, 90, 90];
-    const crema: [number, number, number] = [251, 243, 213];
 
     const pie = () => {
       const total = pdf.internal.getNumberOfPages();
@@ -406,59 +403,62 @@ export class DocumentacionComponent implements OnInit {
       }
     };
 
-    // Encabezado
-    pdf.setTextColor(...guinda);
+    // Encabezado: título, periodo/fecha y el área a la derecha.
+    pdf.setTextColor(0, 0, 0);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(16);
     pdf.text('DOCUMENTO DE DOCUMENTACIÓN DE MATERIALES', m.left, y);
     y += 20;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
-    pdf.text(`Dirección: ${doc.direccion}`, m.left, y);
-    y += 15;
     pdf.setFontSize(9);
     pdf.setTextColor(...gris);
-    pdf.text(`Periodo: ${this.periodo}`, m.left, y);
-    pdf.text(`Fecha de emisión: ${this.fechaEmision}`, ancho - m.right, y, { align: 'right' });
+    pdf.text(`Periodo: ${this.periodo}   ·   Fecha de emisión: ${this.fechaEmision}`, m.left, y);
+    y += 16;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`ÁREA: ${doc.direccion}`, ancho - m.right, y, { align: 'right' });
     y += 8;
-    pdf.setDrawColor(...guinda);
-    pdf.setLineWidth(1.2);
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(1);
     pdf.line(m.left, y, ancho - m.right, y);
     y += 22;
 
-    // Columnas: DESCRIPCIÓN | UNIDAD | CANTIDAD | P. UNITARIO | SUBTOTAL
-    const colDesc = 250;
+    // Columnas: # | DESCRIPCIÓN | UNIDAD DE MEDIDA | CANTIDAD | P.U. | SUBTOTAL
+    const colNum = 24;
+    const colDesc = 205;
     const colUnidad = 80;
-    const colCant = 70;
-    const colPrecio = 95;
-    const colSub = util - colDesc - colUnidad - colCant - colPrecio;
-    const xDesc = m.left;
+    const colCant = 60;
+    const colPrecio = 66;
+    const colSub = util - colNum - colDesc - colUnidad - colCant - colPrecio;
+    const xNum = m.left;
+    const xDesc = xNum + colNum;
     const xUnidad = xDesc + colDesc;
     const xCant = xUnidad + colUnidad;
     const xPrecio = xCant + colCant;
     const xSub = xPrecio + colPrecio;
 
-    const encabezado = ['DESCRIPCIÓN', 'UNIDAD DE MEDIDA', 'CANTIDAD', 'PRECIO UNITARIO', 'SUBTOTAL'];
-    const alineaciones: ('left' | 'right' | 'center')[] = ['left', 'center', 'right', 'right', 'right'];
-    const columnas = [xDesc, xUnidad, xCant, xPrecio, xSub];
-    const anchos = [colDesc, colUnidad, colCant, colPrecio, colSub];
+    const encabezado = ['#', 'DESCRIPCIÓN', 'UNIDAD DE MEDIDA', 'CANTIDAD', 'P.U.', 'SUBTOTAL'];
+    const alineaciones: ('left' | 'right' | 'center')[] = ['center', 'left', 'center', 'right', 'right', 'right'];
+    const columnas = [xNum, xDesc, xUnidad, xCant, xPrecio, xSub];
+    const anchos = [colNum, colDesc, colUnidad, colCant, colPrecio, colSub];
 
     const pintarEncabezado = (yy: number): number => {
-      pdf.setFillColor(...crema);
-      pdf.rect(m.left, yy, util, 20, 'F');
-      pdf.setDrawColor(...guinda);
+      pdf.setDrawColor(0, 0, 0);
       pdf.setLineWidth(0.6);
       pdf.rect(m.left, yy, util, 20);
+      for (let i = 1; i < columnas.length; i++) {
+        pdf.line(columnas[i], yy, columnas[i], yy + 20);
+      }
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(8.5);
-      pdf.setTextColor(...guinda);
+      pdf.setTextColor(0, 0, 0);
       encabezado.forEach((t, i) => {
-        const anchoUtil = anchos[i] - 8;
         const alineacion = alineaciones[i];
         const x = alineacion === 'left' ? columnas[i] + 4
           : alineacion === 'center' ? columnas[i] + anchos[i] / 2
             : columnas[i] + anchos[i] - 4;
-        pdf.text(pdf.splitTextToSize(t, anchoUtil), x, yy + 13.5, { align: alineacion });
+        pdf.text(t, x, yy + 13.5, { align: alineacion });
       });
       return yy + 20;
     };
@@ -466,8 +466,9 @@ export class DocumentacionComponent implements OnInit {
     y = pintarEncabezado(y);
 
     pdf.setFontSize(9);
-    for (const linea of doc.lineas) {
+    doc.lineas.forEach((linea, idx) => {
       const celdas: [string, ('left' | 'right' | 'center')][] = [
+        [`${idx + 1}`, 'center'],
         [`${linea.descripcion}`, 'left'],
         [`${linea.unidad}`, 'center'],
         [`${this.numero(linea.cantidad)}`, 'right'],
@@ -483,7 +484,7 @@ export class DocumentacionComponent implements OnInit {
       }
       const yTexto = y + 12;
       celdas.forEach(([texto, alineacion], i) => {
-        pdf.setFont('helvetica', i === 0 ? 'normal' : 'normal');
+        pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(40, 40, 40);
         const anchoUtil = anchos[i] - 8;
         const lineas = pdf.splitTextToSize(texto, anchoUtil);
@@ -492,7 +493,7 @@ export class DocumentacionComponent implements OnInit {
             : columnas[i] + anchos[i] - 4;
         pdf.text(lineas, x, yTexto, { align: alineacion });
       });
-      // Referencia de la requisición y marca de costo adjudicado.
+      // Referencia de la requisición.
       pdf.setFont('helvetica', 'italic');
       pdf.setFontSize(7.5);
       pdf.setTextColor(...gris);
@@ -500,11 +501,11 @@ export class DocumentacionComponent implements OnInit {
         + (linea.precioAdjudicado ? ' · costo adjudicado' : ' · precio estimado');
       pdf.text(pdf.splitTextToSize(ref, colDesc - 8), xDesc + 4, y + altoFila - 5);
 
-      pdf.setDrawColor(220, 220, 220);
+      pdf.setDrawColor(160, 160, 160);
       pdf.setLineWidth(0.4);
       pdf.line(m.left, y + altoFila, ancho - m.right, y + altoFila);
       y += altoFila;
-    }
+    });
 
     // Totales
     if (y + 90 > alto - m.bottom) {
@@ -515,14 +516,18 @@ export class DocumentacionComponent implements OnInit {
     const anchoTotales = 230;
     const xTotales = ancho - m.right - anchoTotales;
     const filas: [string, string, boolean][] = [
-      ['SUBTOTAL ADQUIRIDO', this.money(doc.subtotal), false],
-      [`IVA (${(TASA_IVA * 100).toFixed(0)}%)`, this.money(doc.iva), false],
-      ['TOTAL', this.money(doc.total), true]
+      ['Subtotal:', this.money(doc.subtotal), false],
+      [`I.V.A. (${(TASA_IVA * 100).toFixed(0)}%):`, this.money(doc.iva), false],
+      ['Total:', this.money(doc.total), true]
     ];
     for (const [etiqueta, valor, fuerte] of filas) {
       pdf.setFont('helvetica', fuerte ? 'bold' : 'normal');
       pdf.setFontSize(fuerte ? 11 : 10);
-      pdf.setTextColor(...(fuerte ? guinda : gris));
+      if (fuerte) {
+        pdf.setTextColor(0, 0, 0);
+      } else {
+        pdf.setTextColor(60, 60, 60);
+      }
       pdf.text(etiqueta, xTotales, y, { align: 'left' });
       pdf.text(valor, xTotales + anchoTotales, y, { align: 'right' });
       y += fuerte ? 20 : 16;
@@ -533,66 +538,74 @@ export class DocumentacionComponent implements OnInit {
       }
     }
 
-    // Justificaciones
+    // Justificaciones en texto: MATERIAL (negrita): justificación.
     y += 12;
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(11);
-    pdf.setTextColor(...guinda);
+    pdf.setTextColor(0, 0, 0);
     pdf.text('DESCRIPCIÓN Y JUSTIFICACIÓN DE LA ADQUISICIÓN', m.left, y);
     y += 6;
-    pdf.setDrawColor(...guinda);
-    pdf.setLineWidth(0.8);
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.6);
     pdf.line(m.left, y, ancho - m.right, y);
     y += 18;
 
     for (const linea of doc.lineas) {
       const r = linea.requisicion;
-      const bloque = this.bloqueJustificacion(r);
-      const lineasDesc = pdf.splitTextToSize(bloque.descripcion, util);
-      const lineasJust = pdf.splitTextToSize(bloque.justificacion, util);
-      const altoBloque = 14 + lineasDesc.length * 10 + 14 + lineasJust.length * 10 + 12;
+      const material = (r.material || linea.descripcion || '').trim() || '—';
+      const justificacion = (r.justificacion || '').trim() || '—';
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(9);
+      const prefijo = `${material}: `;
+      const anchoPrefijo = pdf.getTextWidth(prefijo);
+      const segmentos: string[] = pdf.splitTextToSize(
+        justificacion,
+        Math.max(util - anchoPrefijo, 60)
+      );
+      const primeraLinea = segmentos[0] ?? '';
+      const resto = segmentos.slice(1).join(' ');
+      const restoLineas: string[] = resto ? pdf.splitTextToSize(resto, util) : [];
+
+      const aviso = r.correccionPendiente
+        ? `Corrección de justificación pendiente: ${r.correccionComentario ?? ''}`
+        : '';
+      const lineasAviso: string[] = aviso ? pdf.splitTextToSize(aviso, util) : [];
+
+      const totalLineas = 1 + restoLineas.length;
+      const altoBloque = totalLineas * 11
+        + (lineasAviso.length ? lineasAviso.length * 10 + 6 : 0)
+        + 6;
 
       if (y + altoBloque > alto - m.bottom - 30) {
         pdf.addPage();
         y = m.top;
       }
 
+      pdf.setTextColor(0, 0, 0);
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(9);
-      pdf.setTextColor(...guinda);
-      pdf.text(bloque.titulo, m.left, y);
-      y += 12;
-
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(8);
-      pdf.setTextColor(...gris);
-      pdf.text('Descripción', m.left, y);
+      pdf.text(prefijo, m.left, y);
       pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(40, 40, 40);
-      pdf.text(lineasDesc, m.left, y + 10);
-      y += 10 + lineasDesc.length * 10 + 4;
-
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(8);
-      pdf.setTextColor(...gris);
-      pdf.text('Justificación', m.left, y);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(40, 40, 40);
-      pdf.text(lineasJust, m.left, y + 10);
-      y += 10 + lineasJust.length * 10 + 14;
-
-      if (r.correccionPendiente) {
-        pdf.setFillColor(255, 246, 219);
-        const aviso = `Corrección de justificación pendiente: ${r.correccionComentario ?? ''}`;
-        const lineasAviso = pdf.splitTextToSize(aviso, util - 16);
-        const altoAviso = lineasAviso.length * 10 + 12;
-        pdf.rect(m.left, y - 10, util, altoAviso, 'F');
+      if (primeraLinea) {
+        pdf.text(primeraLinea, m.left + anchoPrefijo, y);
+      }
+      let yy = y + 11;
+      for (const l2 of restoLineas) {
+        pdf.text(l2, m.left, yy);
+        yy += 11;
+      }
+      if (lineasAviso.length) {
+        yy += 4;
         pdf.setFont('helvetica', 'italic');
         pdf.setFontSize(8);
-        pdf.setTextColor(122, 74, 0);
-        pdf.text(lineasAviso, m.left + 8, y + 2);
-        y += altoAviso + 8;
+        pdf.setTextColor(110, 110, 110);
+        for (const l2 of lineasAviso) {
+          pdf.text(l2, m.left, yy);
+          yy += 10;
+        }
       }
+      y = yy + 6;
     }
 
     pie();
@@ -612,14 +625,6 @@ export class DocumentacionComponent implements OnInit {
     return Math.max(26, lineas * 10 + 16);
   }
 
-  private bloqueJustificacion(r: Requisicion): { titulo: string; descripcion: string; justificacion: string } {
-    return {
-      titulo: `Requisición ${r.folio} · ${r.area} · ${r.nombreSolicitante}`,
-      descripcion: (r.descripcion || r.material || '').trim() || '—',
-      justificacion: (r.justificacion || '').trim() || '—'
-    };
-  }
-
   // ---------- DOCX (Word, tamaño carta) ----------
 
   private construirDocx(d: typeof import('docx')): Docx.File {
@@ -629,7 +634,7 @@ export class DocumentacionComponent implements OnInit {
     type OpcionesTexto = { bold?: boolean; size?: number; color?: string; italics?: boolean };
     type Alineacion = Docx.IParagraphOptions['alignment'];
 
-    /** Párrafo con opciones de texto (negrita, tamaño, color) y de bloque. */
+    /** Párrafo con opciones de texto y de bloque. */
     const p = (
       text: string,
       run: OpcionesTexto = {},
@@ -643,15 +648,14 @@ export class DocumentacionComponent implements OnInit {
       new d.Paragraph({ children: [new d.TextRun({ text, bold: true, size })] });
 
     contenido.push(p('DOCUMENTO DE DOCUMENTACIÓN DE MATERIALES', { bold: true, size: 30 }, { alignment: d.AlignmentType.CENTER }));
-    contenido.push(enNegrita(`Dirección: ${doc.direccion}`, 22));
     contenido.push(p(`Periodo: ${this.periodo}   ·   Fecha de emisión: ${this.fechaEmision}`, { size: 18, color: '666666' }));
+    contenido.push(p(`ÁREA: ${doc.direccion}`, { bold: true, size: 24 }, { alignment: d.AlignmentType.RIGHT }));
     contenido.push(enNegrita('', 10));
 
     const bordeFino = { style: d.BorderStyle.SINGLE, size: 4, color: 'CCCCCC' };
     const borders = { top: bordeFino, bottom: bordeFino, left: bordeFino, right: bordeFino };
     const encabezado = (texto: string, alineacion: Alineacion): Docx.TableCell =>
       new d.TableCell({
-        shading: { fill: 'FBF3D5' },
         borders,
         children: [new d.Paragraph({ alignment: alineacion, children: [new d.TextRun({ text: texto, bold: true, size: 18 })] })]
       });
@@ -664,20 +668,23 @@ export class DocumentacionComponent implements OnInit {
 
     const tabla = new d.Table({
       width: { size: 100, type: d.WidthType.PERCENTAGE },
+      columnWidths: [400, 3400, 1400, 1000, 1800, 1972],
       borders,
       rows: [
         new d.TableRow({
           tableHeader: true,
           children: [
+            encabezado('#', d.AlignmentType.CENTER),
             encabezado('DESCRIPCIÓN', d.AlignmentType.LEFT),
             encabezado('UNIDAD DE MEDIDA', d.AlignmentType.CENTER),
             encabezado('CANTIDAD', d.AlignmentType.RIGHT),
-            encabezado('PRECIO UNITARIO', d.AlignmentType.RIGHT),
+            encabezado('P.U.', d.AlignmentType.RIGHT),
             encabezado('SUBTOTAL', d.AlignmentType.RIGHT)
           ]
         }),
-        ...doc.lineas.map((l) => new d.TableRow({
+        ...doc.lineas.map((l, i) => new d.TableRow({
           children: [
+            celda([textoCelda(`${i + 1}`, d.AlignmentType.CENTER)]),
             celda([
               textoCelda(l.descripcion || '—', d.AlignmentType.LEFT),
               new d.Paragraph({
@@ -705,30 +712,34 @@ export class DocumentacionComponent implements OnInit {
       new d.Paragraph({
         alignment: d.AlignmentType.RIGHT,
         children: [new d.TextRun({
-          text: `${etiqueta}: ${valor}`,
+          text: `${etiqueta} ${valor}`,
           bold: fuerte,
           size: fuerte ? 24 : 20,
-          color: fuerte ? '5B1225' : '333333'
+          color: fuerte ? '000000' : '333333'
         })]
       });
-    contenido.push(totalTexto('SUBTOTAL ADQUIRIDO', this.money(doc.subtotal), false));
-    contenido.push(totalTexto(`IVA (${(TASA_IVA * 100).toFixed(0)}%)`, this.money(doc.iva), false));
-    contenido.push(totalTexto('TOTAL', this.money(doc.total), true));
+    contenido.push(totalTexto('Subtotal:', this.money(doc.subtotal), false));
+    contenido.push(totalTexto(`I.V.A. (${(TASA_IVA * 100).toFixed(0)}%):`, this.money(doc.iva), false));
+    contenido.push(totalTexto('Total:', this.money(doc.total), true));
     contenido.push(enNegrita('', 10));
 
-    contenido.push(p('DESCRIPCIÓN Y JUSTIFICACIÓN DE LA ADQUISICIÓN', { bold: true, size: 22, color: '5B1225' }));
+    contenido.push(p('DESCRIPCIÓN Y JUSTIFICACIÓN DE LA ADQUISICIÓN', { bold: true, size: 22 }));
     for (const linea of doc.lineas) {
       const r = linea.requisicion;
-      const b = this.bloqueJustificacion(r);
-      contenido.push(p(`Requisición ${r.folio} · ${r.area} · ${r.nombreSolicitante}`, { bold: true, size: 18, color: '5B1225' }));
-      contenido.push(p(`Descripción: ${b.descripcion}`, { size: 18 }));
-      contenido.push(p(`Justificación: ${b.justificacion}`, { size: 18 }));
+      const material = (r.material || linea.descripcion || '').trim() || '—';
+      const justificacion = (r.justificacion || '').trim() || '—';
+      contenido.push(new d.Paragraph({
+        spacing: { after: 120 },
+        children: [
+          new d.TextRun({ text: `${material}: `, bold: true, size: 18 }),
+          new d.TextRun({ text: justificacion, size: 18 })
+        ]
+      }));
       if (r.correccionPendiente) {
         contenido.push(p(`Corrección de justificación pendiente: ${r.correccionComentario ?? ''}`, {
-          size: 16, italics: true, color: '7A4A00'
+          size: 16, italics: true, color: '666666'
         }));
       }
-      contenido.push(enNegrita('', 12));
     }
 
     return new d.Document({

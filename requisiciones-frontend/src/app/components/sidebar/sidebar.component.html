@@ -1,20 +1,32 @@
-<aside class="sidebar" [class.colapsada]="colapsada">
-  <div class="sidebar-header">
-    <div class="brand-icono">
-      <i class="bi bi-box-seam-fill"></i>
-    </div>
-    <div class="brand-texto">
-      <h2>ADQUISICIONES</h2>
-      <p>Portal de Control Institucional</p>
-    </div>
-    <button type="button" class="btn-toggle" (click)="toggle()"
-      [title]="colapsada ? 'Expandir menú' : 'Contraer menú'"
-      [attr.aria-label]="colapsada ? 'Expandir menú' : 'Contraer menú'">
-      <i class="bi" [class.bi-layout-sidebar-inset]="!colapsada" [class.bi-layout-sidebar-inset-reverse]="colapsada"></i>
-    </button>
-  </div>
+<div class="sidebar-shell">
+  <button type="button" class="btn-menu-movil" [class.oculto]="menuAbierto" (click)="alternarMenu()"
+    [title]="menuAbierto ? 'Cerrar menú' : 'Abrir menú'"
+    [attr.aria-label]="menuAbierto ? 'Cerrar menú' : 'Abrir menú'"
+    [attr.aria-expanded]="menuAbierto">
+    <i class="bi bi-list"></i>
+  </button>
 
-  <nav class="sidebar-menu">
+  @if (menuAbierto) {
+    <div class="sidebar-overlay" (click)="cerrarMenu()"></div>
+  }
+
+  <aside class="sidebar" [class.colapsada]="colapsada" [class.abierta]="menuAbierto">
+    <div class="sidebar-header">
+      <div class="brand-icono">
+        <i class="bi bi-box-seam-fill"></i>
+      </div>
+      <div class="brand-texto">
+        <h2>ADQUISICIONES</h2>
+        <p>Portal de Control Institucional</p>
+      </div>
+      <button type="button" class="btn-toggle" (click)="toggle()"
+        [title]="colapsada ? 'Expandir menú' : 'Contraer menú'"
+        [attr.aria-label]="colapsada ? 'Expandir menú' : 'Contraer menú'">
+        <i class="bi" [class.bi-layout-sidebar-inset]="!colapsada" [class.bi-layout-sidebar-inset-reverse]="colapsada"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-menu">
     <a class="nav-item" routerLink="/dashboard" [class.active]="activo === 'inicio'" title="Inicio">
       <i class="bi bi-house-door icon"></i>
       <span class="nav-texto">Inicio</span>
@@ -89,4 +101,5 @@
       <span class="nav-texto">Cerrar sesión</span>
     </button>
   </div>
-</aside>
+  </aside>
+</div>

@@ -91,7 +91,7 @@
       }
 
       <div class="row g-3">
-        <!-- SELECCIÓN DE DIRECCIÓN -->
+
         <div class="col-lg-4 no-print">
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-crema">
@@ -122,7 +122,7 @@
         <!-- PREVISUALIZACIÓN TAMAÑO CARTA -->
         <div class="col-lg-8">
           @if (documentoActivo) {
-            <div class="hoja-scroll no-print">
+            <div class="hoja-scroll">
               <div class="doc-hoja" id="doc-hoja">
                 <div class="doc-marca">
                   <span class="doc-marca-titulo">DOCUMENTO DE DOCUMENTACIÓN DE MATERIALES</span>
@@ -131,40 +131,33 @@
 
                 <div class="doc-encabezado">
                   <div>
-                    <p class="doc-label">Dirección</p>
-                    <p class="doc-valor">{{ tituloDocumento }}</p>
-                  </div>
-                  <div class="text-end">
                     <p class="doc-label">Periodo</p>
                     <p class="doc-valor">{{ periodo }}</p>
                     <p class="doc-label mt-2">Fecha de emisión</p>
                     <p class="doc-valor">{{ fechaEmision }}</p>
+                  </div>
+                  <div class="doc-enc-area">
+                    <p class="doc-valor">ÁREA: {{ documentoActivo.direccion }}</p>
                   </div>
                 </div>
 
                 <table class="doc-tabla">
                   <thead>
                     <tr>
+                      <th class="col-num">#</th>
                       <th class="col-desc">DESCRIPCIÓN</th>
                       <th class="col-unidad">UNIDAD DE MEDIDA</th>
                       <th class="col-cant">CANTIDAD</th>
-                      <th class="col-precio">PRECIO UNITARIO</th>
+                      <th class="col-precio">P.U.</th>
                       <th class="col-sub">SUBTOTAL</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @for (l of documentoActivo.lineas; track l.requisicion.id) {
+                    @for (l of documentoActivo.lineas; track l.requisicion.id; let i = $index) {
                       <tr>
+                        <td class="text-center">{{ i + 1 }}</td>
                         <td>
                           <span class="doc-item">{{ l.descripcion || '—' }}</span>
-                          <span class="doc-item-ref">
-                            Requisición {{ l.requisicion.folio }} · {{ clavePartida(l.requisicion) }}
-                            @if (l.precioAdjudicado) {
-                              <em>· costo adjudicado</em>
-                            } @else {
-                              <em>· precio estimado</em>
-                            }
-                          </span>
                         </td>
                         <td class="text-center">{{ l.unidad }}</td>
                         <td class="text-end">{{ numero(l.cantidad) }}</td>
@@ -177,15 +170,15 @@
 
                 <div class="doc-totales">
                   <div class="doc-total-fila">
-                    <span>SUBTOTAL ADQUIRIDO</span>
+                    <span>Subtotal:</span>
                     <span>{{ money(documentoActivo.subtotal) }}</span>
                   </div>
                   <div class="doc-total-fila">
-                    <span>IVA ({{ (tasaIva * 100).toFixed(0) }}%)</span>
+                    <span>I.V.A. ({{ (tasaIva * 100).toFixed(0) }}%):</span>
                     <span>{{ money(documentoActivo.iva) }}</span>
                   </div>
                   <div class="doc-total-fila doc-total-final">
-                    <span>TOTAL</span>
+                    <span>Total:</span>
                     <span>{{ money(documentoActivo.total) }}</span>
                   </div>
                 </div>
@@ -193,23 +186,13 @@
                 <h3 class="doc-seccion">DESCRIPCIÓN Y JUSTIFICACIÓN DE LA ADQUISICIÓN</h3>
 
                 @for (l of documentoActivo.lineas; track l.requisicion.id) {
-                  <div class="doc-bloque">
-                    <p class="doc-bloque-titulo">
-                      Requisición {{ l.requisicion.folio }} · {{ l.requisicion.area }} · {{ l.requisicion.nombreSolicitante }}
-                    </p>
-                    <p class="doc-bloque-campo"><strong>Descripción:</strong> {{ l.requisicion.descripcion || l.requisicion.material || '—' }}</p>
-                    <p class="doc-bloque-campo"><strong>Justificación:</strong> {{ l.requisicion.justificacion || '—' }}</p>
+                  <p class="doc-just-texto">
+                    <strong>{{ (l.requisicion.material || l.descripcion || '—').trim() || '—' }}</strong
+                    >: {{ (l.requisicion.justificacion || '').trim() || '—' }}
                     @if (l.requisicion.correccionPendiente) {
-                      <p class="doc-bloque-correccion">
-                        <i class="bi bi-pencil-square me-1"></i>
-                        <strong>Corrección pendiente:</strong> {{ l.requisicion.correccionComentario }}
-                        <span class="d-block ms-4 text-muted no-print">
-                          Solicitud: {{ l.requisicion.correccionSolicitadaPor || 'Materiales' }}
-                          @if (l.requisicion.correccionSolicitadaFecha) { · {{ l.requisicion.correccionSolicitadaFecha }} }
-                        </span>
-                      </p>
+                      <em class="doc-correccion"> · Corrección de justificación pendiente: {{ l.requisicion.correccionComentario }}</em>
                     }
-                  </div>
+                  </p>
                 }
 
                 <div class="doc-firmas">
@@ -232,7 +215,6 @@
         </div>
       </div>
 
-      <!-- ACCIONES SOBRE LAS REQUISICIONES DEL DOCUMENTO -->
       @if (documentoActivo) {
         <div class="card border-0 shadow-sm p-3 mt-3 no-print">
           <h6 class="small text-guinda mb-2">
@@ -284,7 +266,6 @@
   </main>
 </div>
 
-<!-- PEDIDO DE CORRECCIÓN DE LA JUSTIFICACIÓN -->
 @if (correccionTarget) {
   <div class="modal-overlay" (click)="cerrarCorreccion()">
     <div class="modal-content border-0 shadow p-4" (click)="$event.stopPropagation()">

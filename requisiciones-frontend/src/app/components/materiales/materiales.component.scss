@@ -1,7 +1,10 @@
 @use 'sass:color';
 
-/* ===== VARIABLES DE DISEÑO (CSS provisto por diseño del portal) ===== */
-:root {
+/* ===== VARIABLES DE DISEÑO (CSS provisto por diseño del portal) =====
+   Deben vivir en :host y no en :root: con encapsulación emulada Angular compila
+   `:root` a `[_ngcontent]:root`, que nunca matchea en <html> y las variables
+   quedarían sin definir (botones/badges salían en blanco). */
+:host {
   --color-primary-guinda: #691c32;
   --color-sidebar-bg: #581425;
   --color-gold-accent: #bc955c;
@@ -332,12 +335,12 @@ $crema-tabla: #fbf3d5;
 
   &.btn-green {
     background-color: var(--color-btn-green);
-    &:hover { background-color: color.adjust(#1a5336, $lightness: 8%); }
+    &:hover { background-color: color.adjust($color: #1a5336, $lightness: -6%); }
   }
 
   &.btn-blue {
     background-color: #1e40af;
-    &:hover { background-color: #1e3a8a; }
+    &:hover { background-color: #17338f; }
   }
 
   &.btn-yellow {
@@ -347,12 +350,12 @@ $crema-tabla: #fbf3d5;
 
   &.btn-red {
     background-color: var(--color-btn-red);
-    &:hover { background-color: #7b1a2d; }
+    &:hover { background-color: color.adjust($color: #8b1c31, $lightness: -6%); }
   }
 
   &.btn-excel {
-    background-color: #1d6f42;
-    &:hover { background-color: #185838; }
+    background-color: var(--color-btn-green);
+    &:hover { background-color: color.adjust($color: #1a5336, $lightness: -6%); }
   }
 }
 
@@ -372,12 +375,13 @@ $crema-tabla: #fbf3d5;
   font-weight: 600;
   display: inline-block;
   white-space: nowrap;
+  border: 1px solid transparent;
 
-  &.status-completed { background-color: var(--color-badge-completed-bg); color: var(--color-badge-completed-txt); }
-  &.status-process { background-color: var(--color-badge-process-bg); color: var(--color-badge-process-txt); }
-  &.status-pending { background-color: var(--color-badge-pending-bg); color: var(--color-badge-pending-txt); }
-  &.status-rejected { background-color: #fdecea; color: #a93226; }
-  &.na { background-color: #e5e7eb; color: #6b7280; }
+  &.status-completed { background-color: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+  &.status-process { background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+  &.status-pending { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+  &.status-rejected { background-color: #fdecea; color: #991b1b; border-color: #f5c2c0; }
+  &.status-na { background-color: #e5e7eb; color: #4b5563; border-color: #d1d5db; }
 }
 
 /* ===== RESUMEN INFERIOR ===== */
@@ -430,7 +434,7 @@ $crema-tabla: #fbf3d5;
     }
 
     strong { color: $guinda; }
-    .partida-total { font-weight: 700; color: #15572c; }
+    .partida-total { font-weight: 700; color: var(--color-btn-green); }
   }
 
   .partida-total-filtrada {
@@ -447,7 +451,7 @@ $crema-tabla: #fbf3d5;
     box-shadow: 0 3px 10px rgba($guinda, 0.3);
 
     strong {
-      color: #f6d55c;
+      color: #f1c40f;
     }
 
     .monto {
@@ -584,6 +588,18 @@ $crema-tabla: #fbf3d5;
 }
 
 /* ===== MODALES ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 12, 18, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
 .partida-actual {
   background: #f6f1e3;
   border: 1px dashed color.adjust($guinda, $lightness: 35%);
@@ -595,5 +611,66 @@ $crema-tabla: #fbf3d5;
 }
 
 .modal-content {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  background-color: #ffffff;
   transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* ===== RESPONSIVE: CELULAR ===== */
+@media (max-width: 575.98px) {
+  .toolbar {
+    .filtro-partida {
+      width: 100%;
+
+      .filtro-select {
+        min-width: 0;
+        flex: 1;
+      }
+    }
+
+    .toolbar-derecha {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .tabs-container {
+    gap: 0.5rem;
+
+    .tab-btn {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  .card-container .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 1rem;
+  }
+
+  .summary-bar {
+    padding: 0.85rem 1rem;
+
+    .summary-total {
+      text-align: left;
+      white-space: normal;
+    }
+  }
+
+  .autorizar-body {
+    .decision-costo .d-flex.gap-4 {
+      flex-direction: column;
+      gap: 0.5rem !important;
+    }
+
+    .sugerencia-item {
+      flex-wrap: wrap;
+    }
+  }
 }

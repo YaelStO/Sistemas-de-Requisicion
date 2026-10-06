@@ -352,6 +352,45 @@ input[appCurrencyInput] {
   letter-spacing: 0.02em;
 }
 
+/* ===== RESPONSIVE: CELULAR / TABLET ===== */
+@media (max-width: 991.98px) {
+  .content-area {
+    padding: 1.25rem;
+    max-width: 100%;
+  }
+
+  .main-header {
+    padding-left: 3.5rem; /* espacio para el botón de menú flotante */
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .content-area {
+    padding: 0.85rem;
+  }
+
+  .main-header {
+    h1 { font-size: 1.15rem; }
+    .subtext { font-size: 0.75rem; }
+
+    .header-right .brand-text { display: none; }
+  }
+
+  .section-title { font-size: 1rem; }
+
+  .content-area .card.p-4 {
+    padding: 1rem !important;
+  }
+
+  .modal-overlay .modal-content {
+    width: 100%;
+    max-width: calc(100vw - 2rem) !important;
+  }
+}
+
 /* ===== CONTADORES DE CARACTERES ===== */
 .contador-caracteres {
   font-size: 0.7rem;

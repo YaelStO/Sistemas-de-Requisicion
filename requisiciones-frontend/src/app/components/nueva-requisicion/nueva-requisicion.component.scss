@@ -29,3 +29,48 @@
   .drag-text { font-size: 0.85rem; font-weight: 600; color: #333; margin: 0.5rem 0 0; }
   .sub-drag { font-size: 0.7rem; color: #888; margin: 0.25rem 0 0; }
 }
+
+/* AVISO CUANDO NO HAY PARTIDA SELECCIONADA */
+.partida-aviso {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b02a37;
+}
+
+/* DESPLEGABLE DE DETALLE DE LA PARTIDA (debajo del botón) */
+.partida-descripcion {
+  margin-top: 0.75rem;
+  background-color: #fbf3d5;
+  border: 1px solid #efe3b8;
+  border-left: 4px solid #5b1225;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  animation: partida-desplegar 0.22s ease;
+
+  .partida-descripcion-titulo {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #5b1225;
+    margin-bottom: 0.4rem;
+  }
+
+  .partida-descripcion-texto {
+    font-size: 0.82rem;
+    color: #444;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+}
+
+@keyframes partida-desplegar {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
