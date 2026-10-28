@@ -25,15 +25,18 @@ body {
 /* ===== LAYOUT ===== */
 .dashboard-layout {
   display: flex;
+  width: 100%;
   min-height: 100vh;
   background-color: $gris-fondo;
   font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
 }
 
 .content-area {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+  padding: clamp(1rem, 1.5vw + 0.5rem, 2.5rem);
 }
 
 /* ===== HEADER ===== */
@@ -365,6 +368,10 @@ input[appCurrencyInput] {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+
+  .panel-header {
+    padding-left: 3.5rem;
+  }
 }
 
 @media (max-width: 575.98px) {
@@ -372,10 +379,13 @@ input[appCurrencyInput] {
     padding: 0.85rem;
   }
 
-  .main-header {
+  .main-header,
+  .panel-header {
     h1 { font-size: 1.15rem; }
     .subtext { font-size: 0.75rem; }
+  }
 
+  .main-header {
     .header-right .brand-text { display: none; }
   }
 

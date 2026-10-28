@@ -143,8 +143,9 @@
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted">Precio Estimado Unitario</label>
+            <label class="form-label small text-muted">Precio Estimado Unitario (sin IVA)</label>
             <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput placeholder="0.00" />
+            <div class="form-text">Captura el precio sin IVA.</div>
             @if (requisicionForm.get('precioEstimadoUnitario')?.invalid && requisicionForm.get('precioEstimadoUnitario')?.touched) {
               <div class="invalid-feedback d-block">Ingresa un precio mayor a 0.</div>
             }
@@ -174,6 +175,10 @@
         <p class="text-muted mb-3" style="font-size:0.8rem">
           <i class="bi bi-info-circle me-1"></i>Agrega una o mas sugerencias por producto.
         </p>
+        <div class="alert alert-warning py-2 px-3 mb-3 small" role="alert">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          <strong>Importante:</strong> captura todos los precios <strong>sin IVA</strong>. El autocompletado del enlace puede mostrar el precio con IVA; verifícalo antes de guardar.
+        </div>
 
         <div formArrayName="sugerencias">
           @for (sug of sugerencias.controls; track sug; let i = $index) {
@@ -197,14 +202,37 @@
                 }
               </div>
               <div class="col-md-4">
-                <label class="form-label small text-muted">Precio Estimado Unitario</label>
+                <label class="form-label small text-muted">Precio Estimado Unitario (sin IVA)</label>
                 <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput placeholder="0.00" />
               </div>
               <div class="col-12">
                 <label class="form-label small text-muted">Enlace / Referencia</label>
-                <input type="text" class="form-control" formControlName="enlaceUrl" placeholder="https://www.walmart.com.mx/ip/laptop-dell..." />
+                <div class="input-group">
+                  <input type="text" class="form-control" formControlName="enlaceUrl"
+                    placeholder="https://www.walmart.com.mx/ip/laptop-dell..."
+                    (blur)="autocompletarSugerencia(i)" (paste)="programarAutocompletado(i)" />
+                  <button type="button" class="btn btn-outline-secondary" (click)="autocompletarSugerencia(i)"
+                    [disabled]="isAutocompletando(i)">
+                    @if (isAutocompletando(i)) {
+                      <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                      Leyendo...
+                    } @else {
+                      <i class="bi bi-magic me-1"></i>Autocompletar
+                    }
+                  </button>
+                </div>
                 @if (sug.get('enlaceUrl')?.invalid && sug.get('enlaceUrl')?.touched) {
                   <div class="invalid-feedback d-block">Ingresa una URL válida (ej. https://www.ejemplo.com)</div>
+                }
+                @if (previewMensaje(i)) {
+                  <div class="form-text text-success">
+                    <i class="bi bi-check-circle me-1"></i>{{ previewMensaje(i) }}
+                  </div>
+                }
+                @if (previewError(i)) {
+                  <div class="form-text text-danger">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ previewError(i) }}
+                  </div>
                 }
               </div>
               <div class="col-12">
@@ -247,7 +275,7 @@
               <tr>
                 <th>Marca</th>
                 <th>Modelo</th>
-                <th>Precio Unitario</th>
+                <th>Precio Unitario (sin IVA)</th>
                 <th>Enlace / Referencia</th>
                 <th>PDF / Ficha</th>
               </tr>
@@ -296,8 +324,8 @@
           <div class="d-flex gap-4 small text-muted">
             <span>Cantidad: <strong>{{ requisicionForm.get('cantidad')?.value || 0 }}</strong></span>
             <span>Unidad: <strong>{{ requisicionForm.get('unidadMedida')?.value || '-' }}</strong></span>
-            <span>P. Unitario Est.: <strong>{{ formatMoney(requisicionForm.get('precioEstimadoUnitario')?.value) }}</strong></span>
-            <span class="fw-bold text-dark fs-6">Total: {{ formatMoney(totalEstimado) }}</span>
+            <span>P. Unitario Est. (sin IVA): <strong>{{ formatMoney(requisicionForm.get('precioEstimadoUnitario')?.value) }}</strong></span>
+            <span class="fw-bold text-dark fs-6">Total (sin IVA): {{ formatMoney(totalEstimado) }}</span>
           </div>
         </div>
 

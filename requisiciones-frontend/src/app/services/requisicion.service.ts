@@ -4,6 +4,7 @@ import { Observable, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 const TIEMPO_ESPERA_MS = 15000;
+const TIEMPO_ESPERA_PREVIEW_MS = 30000;
 
 export interface Sugerencia {
   id?: number;
@@ -13,6 +14,14 @@ export interface Sugerencia {
   enlaceUrl?: string;
   archivoPdfNombre?: string;
   archivoPdfUrl?: string;
+}
+
+export interface SugerenciaPreview {
+  marca: string | null;
+  modelo: string | null;
+  precioEstimado: number | null;
+  titulo: string | null;
+  moneda: string | null;
 }
 
 export interface ArchivoSubido {
@@ -124,6 +133,12 @@ export class RequisicionService {
 
   listar(): Observable<Requisicion[]> {
     return this.http.get<Requisicion[]>(this.apiUrl).pipe(timeout(TIEMPO_ESPERA_MS));
+  }
+
+  previewSugerencia(url: string): Observable<SugerenciaPreview> {
+    return this.http.get<SugerenciaPreview>(`${this.apiUrl}/sugerencia-preview`, {
+      params: { url }
+    }).pipe(timeout(TIEMPO_ESPERA_PREVIEW_MS));
   }
 
   listarMateriales(): Observable<Requisicion[]> {

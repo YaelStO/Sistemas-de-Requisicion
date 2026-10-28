@@ -2,6 +2,7 @@ package com.sisrequisiciones.requisiciones_backend.modules.requisicion.controlle
 
 import com.sisrequisiciones.requisiciones_backend.modules.auth.entity.Usuario;
 import com.sisrequisiciones.requisiciones_backend.modules.requisicion.dto.*;
+import com.sisrequisiciones.requisiciones_backend.modules.requisicion.service.EnlacePreviewService;
 import com.sisrequisiciones.requisiciones_backend.modules.requisicion.service.RequisicionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,9 +17,13 @@ import java.util.List;
 public class RequisicionController {
 
     private final RequisicionService requisicionService;
+    private final EnlacePreviewService enlacePreviewService;
 
-    public RequisicionController(RequisicionService requisicionService) {
+    public RequisicionController(
+            RequisicionService requisicionService,
+            EnlacePreviewService enlacePreviewService) {
         this.requisicionService = requisicionService;
+        this.enlacePreviewService = enlacePreviewService;
     }
 
     private Usuario usuario(Authentication auth) {
@@ -29,6 +34,15 @@ public class RequisicionController {
     public ResponseEntity<?> listar(Authentication auth) {
         try {
             return ResponseEntity.ok(requisicionService.listarPorRol(usuario(auth)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/sugerencia-preview")
+    public ResponseEntity<?> sugerenciaPreview(@RequestParam("url") String url) {
+        try {
+            return ResponseEntity.ok(enlacePreviewService.obtener(url));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

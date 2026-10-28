@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { CatalogoService } from '../../services/catalogo.service';
 import { AuthService } from '../../services/auth.service';
-import { RequisicionService, Sugerencia } from '../../services/requisicion.service';
+import { RequisicionService, Sugerencia, SugerenciaPreview } from '../../services/requisicion.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { Partida, UnidadMedida } from '../../models/partida.model';
 import { CurrencyInputDirective } from '../../directives/currency-input.directive';
+import { finalize } from 'rxjs';
 
 const MAX_MARCA = 300;
 const MAX_MODELO = 200;
@@ -34,6 +35,11 @@ export class NuevaRequisicionComponent implements OnInit {
   mensaje = '';
   error = '';
   guardando = false;
+  private autocompletando = new Set<number>();
+  private previewMensajes = new Map<number, string>();
+  private previewErrores = new Map<number, string>();
+  private ultimaUrlPreview = new Map<number, string>();
+  private solicitudPreview = new Map<number, number>();
 
   private authService = inject(AuthService);
   private requisicionService = inject(RequisicionService);
@@ -147,6 +153,126 @@ export class NuevaRequisicionComponent implements OnInit {
     this.sugerencias.removeAt(index);
     this.archivosPdf[index] = undefined as unknown as File;
     this.archivosPdf = this.archivosPdf.filter(() => true);
+    this.limpiarEstadosPreview();
+  }
+
+  isAutocompletando(index: number): boolean {
+    return this.autocompletando.has(index);
+  }
+
+  previewMensaje(index: number): string {
+    return this.previewMensajes.get(index) ?? '';
+  }
+
+  previewError(index: number): string {
+    return this.previewErrores.get(index) ?? '';
+  }
+
+  programarAutocompletado(index: number): void {
+    setTimeout(() => this.autocompletarSugerencia(index), 0);
+  }
+
+  autocompletarSugerencia(index: number): void {
+    const sugerencia = this.sugerencias.at(index);
+    if (!sugerencia) {
+      return;
+    }
+    const url = String(sugerencia.get('enlaceUrl')?.value ?? '').trim();
+    if (!url) {
+      this.limpiarEstadoPreview(index);
+      return;
+    }
+    if (!URL_PATRON.test(url)) {
+      this.previewErrores.set(index, 'Ingresa una URL válida (ej. https://www.ejemplo.com).');
+      this.previewMensajes.delete(index);
+      this.cdr.markForCheck();
+      return;
+    }
+    if (this.autocompletando.has(index) || this.ultimaUrlPreview.get(index) === url) {
+      return;
+    }
+
+    const solicitud = (this.solicitudPreview.get(index) ?? 0) + 1;
+    this.solicitudPreview.set(index, solicitud);
+    this.autocompletando.add(index);
+    this.previewMensajes.delete(index);
+    this.previewErrores.delete(index);
+    this.cdr.markForCheck();
+
+    this.requisicionService.previewSugerencia(url).pipe(
+      finalize(() => {
+        if (this.solicitudPreview.get(index) === solicitud) {
+          this.autocompletando.delete(index);
+          this.cdr.markForCheck();
+        }
+      })
+    ).subscribe({
+      next: (data: SugerenciaPreview) => {
+        const actual = this.sugerencias.at(index);
+        if (!actual || String(actual.get('enlaceUrl')?.value ?? '').trim() !== url) {
+          return;
+        }
+        let rellenados = 0;
+        const marca = (data.marca ?? '').trim();
+        const marcaCtrl = actual.get('marca');
+        if (marca && !String(marcaCtrl?.value ?? '').trim()) {
+          marcaCtrl?.setValue(marca.slice(0, MAX_MARCA));
+          rellenados++;
+        }
+
+        const modelo = (data.modelo ?? '').trim();
+        const modeloCtrl = actual.get('modelo');
+        if (modelo && !String(modeloCtrl?.value ?? '').trim()) {
+          modeloCtrl?.setValue(modelo.slice(0, MAX_MODELO));
+          rellenados++;
+        }
+
+        const precio = Number(data.precioEstimado);
+        const precioCtrl = actual.get('precioEstimadoUnitario');
+        const precioActual = Number(precioCtrl?.value) || 0;
+        if (Number.isFinite(precio) && precio > 0 && precioActual <= 0) {
+          precioCtrl?.setValue(Math.round(precio * 100) / 100);
+          rellenados++;
+        }
+
+        this.ultimaUrlPreview.set(index, url);
+        if (rellenados > 0) {
+          this.previewMensajes.set(index, data.precioEstimado != null
+            ? 'Datos autocompletados desde el enlace. Verifica que el precio sea SIN IVA.'
+            : 'Datos autocompletados desde el enlace. Captura el precio sin IVA.');
+        } else {
+          this.previewMensajes.set(index, data.precioEstimado != null
+            ? 'El enlace se leyó, pero los campos ya tenían datos. Verifica que el precio sea sin IVA.'
+            : 'El enlace se leyó. Captura el precio sin IVA.');
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.ultimaUrlPreview.delete(index);
+        const detalle = typeof err.error === 'string'
+          ? err.error
+          : err.error?.error ?? err.error?.message;
+        this.previewErrores.set(index, typeof detalle === 'string' && detalle.trim()
+          ? detalle
+          : 'No se pudo leer el enlace. Captura los datos manualmente.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private limpiarEstadoPreview(index: number): void {
+    this.autocompletando.delete(index);
+    this.previewMensajes.delete(index);
+    this.previewErrores.delete(index);
+    this.ultimaUrlPreview.delete(index);
+  }
+
+  private limpiarEstadosPreview(): void {
+    this.autocompletando.clear();
+    this.previewMensajes.clear();
+    this.previewErrores.clear();
+    this.ultimaUrlPreview.clear();
+    this.solicitudPreview.clear();
   }
 
   syncArchivos(): void {
@@ -264,6 +390,7 @@ export class NuevaRequisicionComponent implements OnInit {
         this.requisicionForm.reset({ cantidad: 1, precioEstimadoUnitario: 0 });
         (this.requisicionForm.get('sugerencias') as FormArray).clear();
         this.archivosPdf = [];
+        this.limpiarEstadosPreview();
         this.partidaSeleccionada = null;
         this.descripcionPartidaAbierta = false;
         this.avisoPartida = '';

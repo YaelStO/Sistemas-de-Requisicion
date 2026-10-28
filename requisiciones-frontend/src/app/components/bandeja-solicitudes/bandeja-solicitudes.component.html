@@ -23,21 +23,21 @@
     <div class="card border-0 shadow-sm p-4">
       @if (esMateriales) {
         <div class="row g-3 mb-3">
-          <div class="col-md-4">
+          <div class="col-12 col-sm-4">
             <div class="card metric-material border-0 shadow-sm text-center p-3">
               <i class="bi bi-check2-circle metric-icon text-success"></i>
               <span class="metrica-valor">{{ requisiciones.length }}</span>
               <span class="metrica-label">Solicitudes aprobadas</span>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-sm-4">
             <div class="card metric-material border-0 shadow-sm text-center p-3">
               <i class="bi bi-cash-coin metric-icon text-success"></i>
               <span class="metrica-valor">{{ formatMoney(totalEstimadoMateriales) }}</span>
               <span class="metrica-label">Total estimado</span>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-sm-4">
             <div class="card metric-material border-0 shadow-sm text-center p-3">
               <i class="bi bi-tags metric-icon text-secondary"></i>
               <span class="metrica-valor">{{ partidasDisponibles.length }}</span>
@@ -398,7 +398,7 @@
                   <tr>
                     <th>Marca</th>
                     <th>Modelo</th>
-                    <th>Precio</th>
+                    <th>Precio (sin IVA)</th>
                     <th>Enlace</th>
                     <th>PDF</th>
                   </tr>
@@ -433,6 +433,10 @@
           @if (editando) {
             <div class="card bg-light p-3 mb-3">
               <h6 class="text-guinda"><i class="bi bi-pencil-square me-1"></i>Modificar requisicion</h6>
+              <div class="alert alert-warning py-2 px-3 mb-3 small" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <strong>Importante:</strong> captura todos los precios <strong>sin IVA</strong>. El autocompletado del enlace puede mostrar el precio con IVA; verifícalo antes de guardar.
+              </div>
               <form [formGroup]="editForm" (ngSubmit)="guardarEdicion()">
                 <div class="row g-3">
                   <div class="col-md-8">
@@ -448,7 +452,7 @@
                     <input type="text" class="form-control" formControlName="unidad" />
                   </div>
                   <div class="col-md-4">
-                    <label class="form-label small text-muted">Precio estimado unitario</label>
+                    <label class="form-label small text-muted">Precio estimado unitario (sin IVA)</label>
                     <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput placeholder="0.00" />
                   </div>
                   <div class="col-12">
@@ -480,14 +484,36 @@
                         }
                       </div>
                       <div class="col-md-3">
-                        <label class="form-label small text-muted">Precio</label>
+                        <label class="form-label small text-muted">Precio (sin IVA)</label>
                         <input type="text" class="form-control form-control-sm" formControlName="precioEstimado" appCurrencyInput placeholder="0.00" />
                       </div>
                       <div class="col-md-3">
                         <label class="form-label small text-muted">Enlace</label>
-                        <input type="text" class="form-control form-control-sm" formControlName="enlaceUrl" placeholder="https://..." />
+                        <div class="input-group input-group-sm">
+                          <input type="text" class="form-control form-control-sm" formControlName="enlaceUrl"
+                            placeholder="https://..." (blur)="autocompletarSugerencia(i)"
+                            (paste)="programarAutocompletado(i)" />
+                          <button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="autocompletarSugerencia(i)" [disabled]="isAutocompletando(i)">
+                            @if (isAutocompletando(i)) {
+                              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            } @else {
+                              <i class="bi bi-magic"></i>
+                            }
+                          </button>
+                        </div>
                         @if (sug.get('enlaceUrl')?.invalid && sug.get('enlaceUrl')?.touched) {
                           <div class="invalid-feedback d-block">URL no válida.</div>
+                        }
+                        @if (previewMensaje(i)) {
+                          <div class="form-text text-success">
+                            <i class="bi bi-check-circle me-1"></i>{{ previewMensaje(i) }}
+                          </div>
+                        }
+                        @if (previewError(i)) {
+                          <div class="form-text text-danger">
+                            <i class="bi bi-exclamation-circle me-1"></i>{{ previewError(i) }}
+                          </div>
                         }
                       </div>
                     </div>

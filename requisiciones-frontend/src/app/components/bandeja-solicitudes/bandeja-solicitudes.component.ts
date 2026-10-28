@@ -6,7 +6,7 @@ import { finalize, forkJoin } from 'rxjs';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AreaService, Area } from '../../services/area.service';
-import { RequisicionService, Requisicion, Sugerencia, HistoricoEvento } from '../../services/requisicion.service';
+import { RequisicionService, Requisicion, Sugerencia, SugerenciaPreview, HistoricoEvento } from '../../services/requisicion.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { CurrencyInputDirective } from '../../directives/currency-input.directive';
 
@@ -48,6 +48,11 @@ export class BandejaSolicitudesComponent implements OnInit {
   justificacionRechazo = '';
   editando = false;
   editForm!: FormGroup;
+  private autocompletando = new Set<number>();
+  private previewMensajes = new Map<number, string>();
+  private previewErrores = new Map<number, string>();
+  private ultimaUrlPreview = new Map<number, string>();
+  private solicitudPreview = new Map<number, number>();
 
   vista: 'arbol' | 'lista' = 'arbol';
   areas: Area[] = [];
@@ -295,6 +300,7 @@ export class BandejaSolicitudesComponent implements OnInit {
   iniciarEdicion(): void {
     const r = this.requisicionSeleccionada;
     if (!r) return;
+    this.limpiarEstadosPreview();
     this.editando = true;
     this.editForm = this.fb.group({
       material: [r.material, Validators.required],
@@ -331,10 +337,134 @@ export class BandejaSolicitudesComponent implements OnInit {
 
   eliminarSugerenciaEdit(i: number): void {
     this.sugerencias.removeAt(i);
+    this.limpiarEstadosPreview();
+  }
+
+  isAutocompletando(i: number): boolean {
+    return this.autocompletando.has(i);
+  }
+
+  previewMensaje(i: number): string {
+    return this.previewMensajes.get(i) ?? '';
+  }
+
+  previewError(i: number): string {
+    return this.previewErrores.get(i) ?? '';
+  }
+
+  programarAutocompletado(i: number): void {
+    setTimeout(() => this.autocompletarSugerencia(i), 0);
+  }
+
+  autocompletarSugerencia(i: number): void {
+    if (!this.editForm) {
+      return;
+    }
+    const sugerencia = this.sugerencias.at(i);
+    if (!sugerencia) {
+      return;
+    }
+    const url = String(sugerencia.get('enlaceUrl')?.value ?? '').trim();
+    if (!url) {
+      this.limpiarEstadoPreview(i);
+      return;
+    }
+    if (!URL_PATRON.test(url)) {
+      this.previewErrores.set(i, 'Ingresa una URL válida (ej. https://www.ejemplo.com).');
+      this.previewMensajes.delete(i);
+      this.cdr.markForCheck();
+      return;
+    }
+    if (this.autocompletando.has(i) || this.ultimaUrlPreview.get(i) === url) {
+      return;
+    }
+
+    const solicitud = (this.solicitudPreview.get(i) ?? 0) + 1;
+    this.solicitudPreview.set(i, solicitud);
+    this.autocompletando.add(i);
+    this.previewMensajes.delete(i);
+    this.previewErrores.delete(i);
+    this.cdr.markForCheck();
+
+    this.requisicionService.previewSugerencia(url).pipe(
+      finalize(() => {
+        if (this.solicitudPreview.get(i) === solicitud) {
+          this.autocompletando.delete(i);
+          this.cdr.markForCheck();
+        }
+      })
+    ).subscribe({
+      next: (data: SugerenciaPreview) => {
+        const actual = this.sugerencias.at(i);
+        if (!actual || String(actual.get('enlaceUrl')?.value ?? '').trim() !== url) {
+          return;
+        }
+        let rellenados = 0;
+        const marca = (data.marca ?? '').trim();
+        const marcaCtrl = actual.get('marca');
+        if (marca && !String(marcaCtrl?.value ?? '').trim()) {
+          marcaCtrl?.setValue(marca.slice(0, MAX_MARCA));
+          rellenados++;
+        }
+
+        const modelo = (data.modelo ?? '').trim();
+        const modeloCtrl = actual.get('modelo');
+        if (modelo && !String(modeloCtrl?.value ?? '').trim()) {
+          modeloCtrl?.setValue(modelo.slice(0, MAX_MODELO));
+          rellenados++;
+        }
+
+        const precio = Number(data.precioEstimado);
+        const precioCtrl = actual.get('precioEstimado');
+        const precioActual = Number(precioCtrl?.value) || 0;
+        if (Number.isFinite(precio) && precio > 0 && precioActual <= 0) {
+          precioCtrl?.setValue(Math.round(precio * 100) / 100);
+          rellenados++;
+        }
+
+        this.ultimaUrlPreview.set(i, url);
+        if (rellenados > 0) {
+          this.previewMensajes.set(i, data.precioEstimado != null
+            ? 'Datos autocompletados desde el enlace. Verifica que el precio sea SIN IVA.'
+            : 'Datos autocompletados desde el enlace. Captura el precio sin IVA.');
+        } else {
+          this.previewMensajes.set(i, data.precioEstimado != null
+            ? 'El enlace se leyó, pero los campos ya tenían datos. Verifica que el precio sea sin IVA.'
+            : 'El enlace se leyó. Captura el precio sin IVA.');
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.ultimaUrlPreview.delete(i);
+        const detalle = typeof err.error === 'string'
+          ? err.error
+          : err.error?.error ?? err.error?.message;
+        this.previewErrores.set(i, typeof detalle === 'string' && detalle.trim()
+          ? detalle
+          : 'No se pudo leer el enlace. Captura los datos manualmente.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private limpiarEstadoPreview(i: number): void {
+    this.autocompletando.delete(i);
+    this.previewMensajes.delete(i);
+    this.previewErrores.delete(i);
+    this.ultimaUrlPreview.delete(i);
+  }
+
+  private limpiarEstadosPreview(): void {
+    this.autocompletando.clear();
+    this.previewMensajes.clear();
+    this.previewErrores.clear();
+    this.ultimaUrlPreview.clear();
+    this.solicitudPreview.clear();
   }
 
   cancelarEdicion(): void {
     this.editando = false;
+    this.limpiarEstadosPreview();
   }
 
   guardarEdicion(): void {
@@ -367,6 +497,7 @@ export class BandejaSolicitudesComponent implements OnInit {
       next: (actualizada) => {
         this.actualizarLista(actualizada);
         this.editando = false;
+        this.limpiarEstadosPreview();
         this.mensajeAccion = `Requisición ${actualizada.folio} modificada. Los cambios quedaron registrados en la bitacora.`;
         this.cdr.markForCheck();
       },
@@ -573,18 +704,6 @@ export class BandejaSolicitudesComponent implements OnInit {
     this.nodosNivel = [];
     this.breadcrumb = [];
 
-    if (this.areaId != null) {
-      const nodo = this.nodosPorId.get(this.areaId) ?? null;
-      if (!nodo) {
-        this.router.navigate(['/bandeja-solicitudes'], { replaceUrl: true });
-        return;
-      }
-      this.nodoActual = nodo;
-      this.nodosNivel = nodo.hijos;
-      this.breadcrumb = this.rutaHasta(nodo);
-      return;
-    }
-
     if (this.esDepartamento) {
       // El departamento no navega el organigrama: sólo ve lo que él generó.
       this.nodoActual = null;
@@ -593,17 +712,60 @@ export class BandejaSolicitudesComponent implements OnInit {
       return;
     }
 
-    const miAreaId = this.authService.usuario?.areaId ?? null;
-    const miNodo = (miAreaId != null ? this.nodosPorId.get(miAreaId) : null) ?? null;
-    if (miNodo) {
-      this.nodosNivel = miNodo.hijos;
-      this.breadcrumb = this.rutaHasta(miNodo);
+    const miNodo = this.nodoRaizVisible();
+
+    if (this.areaId != null) {
+      const nodo = this.nodosPorId.get(this.areaId) ?? null;
+      if (!nodo || !this.nodoPermitido(nodo, miNodo)) {
+        this.router.navigate(['/bandeja-solicitudes'], { replaceUrl: true });
+        return;
+      }
+      this.nodoActual = nodo;
+      this.nodosNivel = nodo.hijos;
+      this.breadcrumb = this.rutaVisible(nodo, miNodo);
       return;
     }
 
-    const dg = this.nodosRaiz.find((r) => r.area.nivel === 'DIRECCION_GENERAL');
-    this.nodosNivel = dg ? dg.hijos : this.nodosRaiz;
-    this.breadcrumb = dg ? [dg] : [];
+    if (miNodo) {
+      this.nodosNivel = miNodo.hijos;
+      this.breadcrumb = this.rutaVisible(miNodo, miNodo);
+      return;
+    }
+
+    if (this.esDireccionGeneral) {
+      const dg = this.nodosRaiz.find((r) => r.area.nivel === 'DIRECCION_GENERAL');
+      this.nodosNivel = dg ? dg.hijos : this.nodosRaiz;
+      this.breadcrumb = dg ? [dg] : [];
+      return;
+    }
+
+    this.nodosNivel = [];
+    this.breadcrumb = [];
+  }
+
+  private nodoRaizVisible(): NodoArea | null {
+    const miAreaId = this.authService.usuario?.areaId ?? null;
+    if (miAreaId == null) return null;
+    return this.nodosPorId.get(miAreaId) ?? null;
+  }
+
+  private nodoPermitido(nodo: NodoArea, raiz: NodoArea | null): boolean {
+    if (!raiz) return this.esDireccionGeneral;
+    let actual: NodoArea | null = nodo;
+    let pasos = 0;
+    while (actual && pasos < 64) {
+      if (actual.area.id === raiz.area.id) return true;
+      actual = this.padrePorId.get(actual.area.id) ?? null;
+      pasos++;
+    }
+    return false;
+  }
+
+  private rutaVisible(nodo: NodoArea, raiz: NodoArea | null): NodoArea[] {
+    const ruta = this.rutaHasta(nodo);
+    if (!raiz) return ruta;
+    const inicio = ruta.findIndex((n) => n.area.id === raiz.area.id);
+    return inicio >= 0 ? ruta.slice(inicio) : ruta;
   }
 
   private rutaHasta(nodo: NodoArea): NodoArea[] {

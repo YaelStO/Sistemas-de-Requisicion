@@ -25,6 +25,10 @@ export class DashboardComponent implements OnInit {
   protected router = inject(Router);
   private authService = inject(AuthService);
 
+  get esMateriales(): boolean {
+    return this.authService.rol === 'ROLE_MATERIALES';
+  }
+
   get total() { return this.dashboard?.total ?? 0; }
   get enRevision() { return this.dashboard?.enRevision ?? 0; }
   get aprobadas() { return this.dashboard?.aprobadas ?? 0; }

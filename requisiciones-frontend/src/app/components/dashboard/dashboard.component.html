@@ -76,28 +76,28 @@
     } @else {
       <!-- METRICAS -->
       <section class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card metric-card border-0 shadow-sm text-center p-3">
             <i class="bi bi-folder2-open metric-icon text-secondary"></i>
             <span class="metrica-valor">{{ total }}</span>
             <span class="metrica-label">Solicitudes totales</span>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card metric-card border-0 shadow-sm text-center p-3">
             <i class="bi bi-hourglass-split metric-icon text-primary"></i>
             <span class="metrica-valor c-azul">{{ enRevision }}</span>
             <span class="metrica-label">En revision</span>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card metric-card border-0 shadow-sm text-center p-3">
             <i class="bi bi-check-circle metric-icon text-success"></i>
             <span class="metrica-valor c-verde">{{ aprobadas }}</span>
             <span class="metrica-label">Aprobadas</span>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card metric-card border-0 shadow-sm text-center p-3">
             <i class="bi bi-x-circle metric-icon text-danger"></i>
             <span class="metrica-valor c-rojo">{{ rechazadas }}</span>
@@ -106,53 +106,55 @@
         </div>
       </section>
 
-      <!-- SEMAFORO DEL FLUJO DE FIRMAS -->
-      <section class="card border-0 shadow-sm p-4 mb-4">
-        <h3 class="section-title text-guinda">
-          <i class="bi bi-traffic-light me-2"></i>Semaforo del flujo de firmas
-        </h3>
-        <div class="semaforo">
-          <div class="luz semaforo-global" [class]="semaforoGlobalClase()">
-            <span class="luz-punto"></span>
-            <span class="luz-texto">
-              @if (semaforoGlobalClase() === 'verde') { TODO LIBERADO }
-              @else if (semaforoGlobalClase() === 'rojo') { SOLICITUDES RECHAZADAS }
-              @else if (semaforoGlobalClase() === 'amarillo') { EN ESPERA DE FIMASS }
-              @else { SIN MOVIMIENTO }
-            </span>
-          </div>
+      @if (!esMateriales) {
+        <!-- SEMAFORO DEL FLUJO DE FIRMAS -->
+        <section class="card border-0 shadow-sm p-4 mb-4">
+          <h3 class="section-title text-guinda">
+            <i class="bi bi-traffic-light me-2"></i>Semaforo del flujo de firmas
+          </h3>
+          <div class="semaforo">
+            <div class="luz semaforo-global" [class]="semaforoGlobalClase()">
+              <span class="luz-punto"></span>
+              <span class="luz-texto">
+                @if (semaforoGlobalClase() === 'verde') { TODO LIBERADO }
+                @else if (semaforoGlobalClase() === 'rojo') { SOLICITUDES RECHAZADAS }
+                @else if (semaforoGlobalClase() === 'amarillo') { EN ESPERA DE FIMASS }
+                @else { SIN MOVIMIENTO }
+              </span>
+            </div>
 
-          <div class="firmas-flow">
-            <div class="etapa">
-              <span class="etapa-luz luz-espera"></span>
-              <i class="bi bi-people-fill etapa-icon text-warning"></i>
-              <span class="etapa-nombre">Coordinacion</span>
-              <span class="etapa-num">panel</span>
-            </div>
-            <div class="flecha"><i class="bi bi-arrow-right"></i></div>
-            <div class="etapa">
-              <span class="etapa-luz luz-proceso"></span>
-              <i class="bi bi-person-workspace etapa-icon text-primary"></i>
-              <span class="etapa-nombre">Direccion de Area</span>
-              <span class="etapa-num">panel</span>
-            </div>
-            <div class="flecha"><i class="bi bi-arrow-right"></i></div>
-            <div class="etapa">
-              <span class="etapa-luz luz-proceso"></span>
-              <i class="bi bi-briefcase-fill etapa-icon text-primary"></i>
-              <span class="etapa-nombre">Direccion General</span>
-              <span class="etapa-num">panel</span>
-            </div>
-            <div class="flecha"><i class="bi bi-arrow-right"></i></div>
-            <div class="etapa">
-              <span class="etapa-luz luz-libre"></span>
-              <i class="bi bi-box-seam-fill etapa-icon text-success"></i>
-              <span class="etapa-nombre">Materiales</span>
-              <span class="etapa-num">liberacion</span>
+            <div class="firmas-flow">
+              <div class="etapa">
+                <span class="etapa-luz luz-espera"></span>
+                <i class="bi bi-people-fill etapa-icon text-warning"></i>
+                <span class="etapa-nombre">Coordinacion</span>
+                <span class="etapa-num">panel</span>
+              </div>
+              <div class="flecha"><i class="bi bi-arrow-right"></i></div>
+              <div class="etapa">
+                <span class="etapa-luz luz-proceso"></span>
+                <i class="bi bi-person-workspace etapa-icon text-primary"></i>
+                <span class="etapa-nombre">Direccion de Area</span>
+                <span class="etapa-num">panel</span>
+              </div>
+              <div class="flecha"><i class="bi bi-arrow-right"></i></div>
+              <div class="etapa">
+                <span class="etapa-luz luz-proceso"></span>
+                <i class="bi bi-briefcase-fill etapa-icon text-primary"></i>
+                <span class="etapa-nombre">Direccion General</span>
+                <span class="etapa-num">panel</span>
+              </div>
+              <div class="flecha"><i class="bi bi-arrow-right"></i></div>
+              <div class="etapa">
+                <span class="etapa-luz luz-libre"></span>
+                <i class="bi bi-box-seam-fill etapa-icon text-success"></i>
+                <span class="etapa-nombre">Materiales</span>
+                <span class="etapa-num">liberacion</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      }
 
       <!-- METRICAS POR AREA -->
       <section class="card border-0 shadow-sm p-4 mb-4">
@@ -191,57 +193,59 @@
         }
       </section>
 
-      <!-- TABLA DE CONTROL -->
-      <section class="card border-0 shadow-sm p-4">
-        <h3 class="section-title text-guinda">
-          <i class="bi bi-list-check me-2"></i>Control del flujo por requisicion
-        </h3>
-        @if (requisiciones.length === 0) {
-          <p class="text-center text-muted py-4">
-            <i class="bi bi-inbox me-1"></i>Sin requisiciones registradas.
-          </p>
-        } @else {
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-crema">
-                <tr>
-                  <th>Folio</th>
-                  <th>Area</th>
-                  <th>Material</th>
-                  <th>Estado Coord.</th>
-                  <th>Estado Dir.</th>
-                  <th>Estado Dir. Gral.</th>
-                  <th>Global</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (r of requisiciones; track r.id) {
+      @if (!esMateriales) {
+        <!-- TABLA DE CONTROL -->
+        <section class="card border-0 shadow-sm p-4">
+          <h3 class="section-title text-guinda">
+            <i class="bi bi-list-check me-2"></i>Control del flujo por requisicion
+          </h3>
+          @if (requisiciones.length === 0) {
+            <p class="text-center text-muted py-4">
+              <i class="bi bi-inbox me-1"></i>Sin requisiciones registradas.
+            </p>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-crema">
                   <tr>
-                    <td class="folio">{{ r.folio }}</td>
-                    <td>{{ r.area }}</td>
-                    <td>{{ r.material }}</td>
-                    <td><span class="badge-estado" [class]="estadoClase(r.estadoCoord)">{{ nivelEtiqueta(r.estadoCoord) }}</span></td>
-                    <td><span class="badge-estado" [class]="estadoClase(r.estadoDir)">{{ nivelEtiqueta(r.estadoDir) }}</span></td>
-                    <td><span class="badge-estado" [class]="estadoClase(r.estadoDirGral)">{{ nivelEtiqueta(r.estadoDirGral) }}</span></td>
-                    <td><span class="badge-estado" [class]="estadoClase(r.estadoGlobal)">{{ r.estadoGlobal.replaceAll('_', ' ') }}</span></td>
-                    <td>
-                      <button type="button" class="btn btn-sm btn-teal" (click)="verDetalle(r.id)">
-                        <i class="bi bi-eye me-1"></i>Ver
-                      </button>
-                      @if (r.correccionPendiente) {
-                        <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem">
-                          <i class="bi bi-pencil-square me-1"></i>corrección
-                        </span>
-                      }
-                    </td>
+                    <th>Folio</th>
+                    <th>Area</th>
+                    <th>Material</th>
+                    <th>Estado Coord.</th>
+                    <th>Estado Dir.</th>
+                    <th>Estado Dir. Gral.</th>
+                    <th>Global</th>
+                    <th></th>
                   </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      </section>
+                </thead>
+                <tbody>
+                  @for (r of requisiciones; track r.id) {
+                    <tr>
+                      <td class="folio">{{ r.folio }}</td>
+                      <td>{{ r.area }}</td>
+                      <td>{{ r.material }}</td>
+                      <td><span class="badge-estado" [class]="estadoClase(r.estadoCoord)">{{ nivelEtiqueta(r.estadoCoord) }}</span></td>
+                      <td><span class="badge-estado" [class]="estadoClase(r.estadoDir)">{{ nivelEtiqueta(r.estadoDir) }}</span></td>
+                      <td><span class="badge-estado" [class]="estadoClase(r.estadoDirGral)">{{ nivelEtiqueta(r.estadoDirGral) }}</span></td>
+                      <td><span class="badge-estado" [class]="estadoClase(r.estadoGlobal)">{{ r.estadoGlobal.replaceAll('_', ' ') }}</span></td>
+                      <td>
+                        <button type="button" class="btn btn-sm btn-teal" (click)="verDetalle(r.id)">
+                          <i class="bi bi-eye me-1"></i>Ver
+                        </button>
+                        @if (r.correccionPendiente) {
+                          <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem">
+                            <i class="bi bi-pencil-square me-1"></i>corrección
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
     }
   </main>
 </div>
