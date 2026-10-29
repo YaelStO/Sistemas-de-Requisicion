@@ -163,8 +163,7 @@
               class="form-control mb-2"
               rows="4"
               maxlength="1000"
-              [(ngModel)]="justificacionCorregida"
-              placeholder="Escribe la justificación corregida..."></textarea>
+              [(ngModel)]="justificacionCorregida"></textarea>
             <p class="contador-caracteres" [class.limite]="justificacionCorregida.length > 950">
               {{ justificacionCorregida.length }} / 1000
             </p>
@@ -290,7 +289,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label small text-muted">Precio estimado unitario</label>
-                <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput placeholder="0.00" />
+                <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput />
               </div>
               <div class="col-12">
                 <label class="form-label small text-muted">Descripcion</label>
@@ -324,11 +323,11 @@
                   </div>
                   <div class="col-md-4">
                     <label class="form-label small text-muted">Precio</label>
-                    <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput placeholder="0.00" />
+                    <input type="text" class="form-control" formControlName="precioEstimado" appCurrencyInput />
                   </div>
                   <div class="col-12">
                     <label class="form-label small text-muted">Enlace</label>
-                    <input type="text" class="form-control" formControlName="enlaceUrl" placeholder="https://..." />
+                    <input type="text" class="form-control" formControlName="enlaceUrl" />
                     @if (sug.get('enlaceUrl')?.invalid && sug.get('enlaceUrl')?.touched) {
                       <div class="invalid-feedback d-block">Ingresa una URL válida (ej. https://www.ejemplo.com)</div>
                     }
@@ -369,7 +368,7 @@
             </div>
             <div class="modal-body">
               <p class="text-muted small">Indica el motivo por el cual se rechaza esta solicitud. El historial quedara registrado.</p>
-              <textarea [(ngModel)]="justificacionRechazo" class="form-control" rows="4" placeholder="Escribe la justificacion del rechazo..."></textarea>
+              <textarea [(ngModel)]="justificacionRechazo" class="form-control" rows="4"></textarea>
             </div>
             <div class="modal-footer border-0">
               <button type="button" class="btn btn-outline-secondary" (click)="mostrarModalRechazo = false">Cancelar</button>

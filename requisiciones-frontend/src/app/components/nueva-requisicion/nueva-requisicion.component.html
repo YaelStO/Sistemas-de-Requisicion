@@ -128,7 +128,7 @@
         <div class="row g-3 mt-3">
           <div class="col-md-5">
             <label class="form-label small text-muted">Material</label>
-            <input type="text" class="form-control" formControlName="materialSolicitado" placeholder="Computadora Portatil" />
+            <input type="text" class="form-control" formControlName="materialSolicitado" />
           </div>
           <div class="col-md-2">
             <label class="form-label small text-muted">Cantidad</label>
@@ -144,7 +144,7 @@
           </div>
           <div class="col-md-3">
             <label class="form-label small text-muted">Precio Estimado Unitario (sin IVA)</label>
-            <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput placeholder="0.00" />
+            <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput />
             <div class="form-text">Captura el precio sin IVA.</div>
             @if (requisicionForm.get('precioEstimadoUnitario')?.invalid && requisicionForm.get('precioEstimadoUnitario')?.touched) {
               <div class="invalid-feedback d-block">Ingresa un precio mayor a 0.</div>
@@ -155,14 +155,14 @@
         <div class="row g-3 mt-3">
           <div class="col-12">
             <label class="form-label small text-muted">Descripcion de Caracteristicas</label>
-            <input type="text" class="form-control" formControlName="descripcion" placeholder="Decribe lo mas detallado el material a solicitar" />
+            <input type="text" class="form-control" formControlName="descripcion" />
           </div>
         </div>
 
         <div class="row g-3 mt-3">
           <div class="col-12">
             <label class="form-label small text-muted">Justificacion de Compra</label>
-            <input type="text" class="form-control" formControlName="justificacion" placeholder="Escribe una justificacion detallada de la adquisicion del material solicitado" />
+            <input type="text" class="form-control" formControlName="justificacion" />
           </div>
         </div>
       </section>
@@ -185,7 +185,7 @@
             <div class="row g-3 mt-2 p-3 border rounded bg-light" [formGroupName]="i">
               <div class="col-md-4">
                 <label class="form-label small text-muted">Marca <span class="text-muted">(máx. {{ maxMarca }})</span></label>
-                <input type="text" class="form-control" formControlName="marca" placeholder="DELL" maxlength="300" />
+                <input type="text" class="form-control" formControlName="marca" maxlength="300" />
                 @if (sug.get('marca')?.value) {
                   <div class="contador-caracteres" [class.limite]="(sug.get('marca')!.value ?? '').length >= maxMarca">
                     {{ (sug.get('marca')!.value ?? '').length }}/{{ maxMarca }}
@@ -194,7 +194,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label small text-muted">Modelo <span class="text-muted">(máx. {{ maxModelo }})</span></label>
-                <input type="text" class="form-control" formControlName="modelo" placeholder="Inspiron 5440" maxlength="200" />
+                <input type="text" class="form-control" formControlName="modelo" maxlength="200" />
                 @if (sug.get('modelo')?.value) {
                   <div class="contador-caracteres" [class.limite]="(sug.get('modelo')!.value ?? '').length >= maxModelo">
                     {{ (sug.get('modelo')!.value ?? '').length }}/{{ maxModelo }}
@@ -203,13 +203,12 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label small text-muted">Precio Estimado Unitario (sin IVA)</label>
-                <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput placeholder="0.00" />
+                <input type="text" class="form-control" formControlName="precioEstimadoUnitario" appCurrencyInput />
               </div>
               <div class="col-12">
                 <label class="form-label small text-muted">Enlace / Referencia</label>
                 <div class="input-group">
                   <input type="text" class="form-control" formControlName="enlaceUrl"
-                    placeholder="https://www.walmart.com.mx/ip/laptop-dell..."
                     (blur)="autocompletarSugerencia(i)" (paste)="programarAutocompletado(i)" />
                   <button type="button" class="btn btn-outline-secondary" (click)="autocompletarSugerencia(i)"
                     [disabled]="isAutocompletando(i)">

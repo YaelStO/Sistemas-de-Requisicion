@@ -283,8 +283,7 @@
         class="form-control"
         rows="4"
         maxlength="1000"
-        [(ngModel)]="correccionComentario"
-        placeholder="Ejemplo: especificar la marca y el modelo-ADQUISICION, y el uso que se dará al material..."></textarea>
+        [(ngModel)]="correccionComentario"></textarea>
       <p class="contador-caracteres" [class.limite]="correccionComentario.length > 950">
         {{ correccionComentario.length }} / 1000
       </p>
