@@ -6,6 +6,7 @@ import { RequisicionService, Requisicion } from '../../services/requisicion.serv
 import { CatalogoService } from '../../services/catalogo.service';
 import { Partida } from '../../models/partida.model';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { CurrencyInputDirective } from '../../directives/currency-input.directive';
 
 type Vista = 'aprobadas' | 'autorizar' | 'proceso';
 
@@ -24,7 +25,7 @@ interface TotalPartida {
 @Component({
   selector: 'app-materiales',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, CurrencyInputDirective],
   templateUrl: './materiales.component.html',
   styleUrl: './materiales.component.scss'
 })

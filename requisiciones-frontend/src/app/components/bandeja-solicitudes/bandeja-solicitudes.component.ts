@@ -9,6 +9,7 @@ import { AreaService, Area } from '../../services/area.service';
 import { RequisicionService, Requisicion, Sugerencia, SugerenciaPreview, HistoricoEvento } from '../../services/requisicion.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { CurrencyInputDirective } from '../../directives/currency-input.directive';
+import { IntegerInputDirective } from '../../directives/integer-input.directive';
 
 const MAX_MARCA = 300;
 const MAX_MODELO = 200;
@@ -27,7 +28,7 @@ interface NodoArea {
   selector: 'app-bandeja-solicitudes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Default,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, SidebarComponent, CurrencyInputDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, SidebarComponent, CurrencyInputDirective, IntegerInputDirective],
   templateUrl: './bandeja-solicitudes.component.html',
   styleUrl: './bandeja-solicitudes.component.scss'
 })

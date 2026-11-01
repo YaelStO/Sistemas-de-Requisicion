@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { RequisicionService, Requisicion, Sugerencia, HistoricoEvento } from '../../services/requisicion.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { CurrencyInputDirective } from '../../directives/currency-input.directive';
+import { IntegerInputDirective } from '../../directives/integer-input.directive';
 
 const MAX_MARCA = 300;
 const MAX_MODELO = 200;
@@ -15,7 +16,7 @@ const URL_PATRON = /^https?:\/\/[\w.-]+\.[a-z]{2,}(\/\S*)?$/i;
 @Component({
   selector: 'app-autorizacion-detalle',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, SidebarComponent, CurrencyInputDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, SidebarComponent, CurrencyInputDirective, IntegerInputDirective],
   templateUrl: './autorizacion-detalle.component.html',
   styleUrl: './autorizacion-detalle.component.scss'
 })

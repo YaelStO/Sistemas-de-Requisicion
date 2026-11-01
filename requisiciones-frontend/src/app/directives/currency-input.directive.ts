@@ -20,14 +20,44 @@ export class CurrencyInputDirective implements ControlValueAccessor {
   constructor(private el: ElementRef<HTMLInputElement>) {
     this.el.nativeElement.inputMode = 'decimal';
     this.el.nativeElement.type = 'text';
+    this.el.nativeElement.autocomplete = 'off';
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key.length !== 1) return;
+
+    if (/\d/.test(event.key)) return;
+
+    if (event.key === '.') {
+      const input = event.target as HTMLInputElement;
+      const seleccion = input.value.substring(input.selectionStart ?? 0, input.selectionEnd ?? 0);
+      if (input.value.includes('.') && !seleccion.includes('.')) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    event.preventDefault();
   }
 
   @HostListener('input', ['$event'])
   onInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const numero = this.parsear(input.value);
-    this.valor = numero;
-    this.onChange(numero);
+    const original = input.value;
+    const limpio = this.sanitizar(original);
+
+    if (limpio !== original) {
+      const posicion = input.selectionStart ?? limpio.length;
+      const eliminados = original.length - limpio.length;
+      input.value = limpio;
+      const nuevaPosicion = Math.max(0, posicion - eliminados);
+      input.setSelectionRange(nuevaPosicion, nuevaPosicion);
+    }
+
+    this.valor = this.parsear(limpio);
+    this.onChange(this.valor);
   }
 
   @HostListener('blur')
@@ -59,6 +89,22 @@ export class CurrencyInputDirective implements ControlValueAccessor {
 
   setDisabledState(disabled: boolean): void {
     this.el.nativeElement.disabled = disabled;
+  }
+
+  private sanitizar(texto: string): string {
+    let limpio = texto.replace(/[^\d.]/g, '');
+    const partes = limpio.split('.');
+    if (partes.length > 2) {
+      limpio = partes[0] + '.' + partes.slice(1).join('');
+    }
+    if (limpio.startsWith('.')) {
+      limpio = '0' + limpio;
+    }
+    const [entero, decimales] = limpio.split('.');
+    if (decimales !== undefined) {
+      limpio = entero + '.' + decimales.slice(0, 2);
+    }
+    return limpio;
   }
 
   private parsear(texto: string): number | null {

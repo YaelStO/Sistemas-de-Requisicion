@@ -7,6 +7,7 @@ import { RequisicionService, Sugerencia, SugerenciaPreview } from '../../service
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { Partida, UnidadMedida } from '../../models/partida.model';
 import { CurrencyInputDirective } from '../../directives/currency-input.directive';
+import { IntegerInputDirective } from '../../directives/integer-input.directive';
 import { finalize } from 'rxjs';
 
 const MAX_MARCA = 300;
@@ -16,7 +17,7 @@ const URL_PATRON = /^https?:\/\/[\w.-]+\.[a-z]{2,}(\/\S*)?$/i;
 @Component({
   selector: 'app-nueva-requisicion',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SidebarComponent, CurrencyInputDirective],
+  imports: [CommonModule, ReactiveFormsModule, SidebarComponent, CurrencyInputDirective, IntegerInputDirective],
   templateUrl: './nueva-requisicion.component.html',
   styleUrl: './nueva-requisicion.component.scss'
 })
